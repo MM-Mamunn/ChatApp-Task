@@ -13,6 +13,7 @@ import { ChatPane } from "./chat-pane";
 import { CreateChatModal } from "./create-chat-modal";
 import { CreateGroupModal } from "./create-group-modal";
 import { ProfileModal } from "./profile-modal";
+import { AdminModal } from "../admin/admin-modal";
 
 export function ChatShell() {
   const { user, isAuthenticated } = useAuth();
@@ -26,6 +27,7 @@ export function ChatShell() {
   const [isCreateChatOpen, setIsCreateChatOpen] = useState(false);
   const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isAdminOpen, setIsAdminOpen] = useState(false);
 
   // Fetch conversation lists
   const refreshConversations = useCallback(async () => {
@@ -159,6 +161,7 @@ export function ChatShell() {
           onOpenCreateChat={() => setIsCreateChatOpen(true)}
           onOpenCreateGroup={() => setIsCreateGroupOpen(true)}
           onOpenProfile={() => setIsProfileOpen(true)}
+          onOpenAdmin={() => setIsAdminOpen(true)}
         />
       </div>
 
@@ -192,6 +195,13 @@ export function ChatShell() {
         isOpen={isProfileOpen}
         onClose={() => setIsProfileOpen(false)}
       />
+
+      {user?.role === "admin" && (
+        <AdminModal
+          isOpen={isAdminOpen}
+          onClose={() => setIsAdminOpen(false)}
+        />
+      )}
     </div>
   );
 }

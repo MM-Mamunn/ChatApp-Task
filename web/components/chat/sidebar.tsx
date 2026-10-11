@@ -38,6 +38,7 @@ interface SidebarProps {
   onOpenCreateChat: () => void;
   onOpenCreateGroup: () => void;
   onOpenProfile: () => void;
+  onOpenAdmin?: () => void;
 }
 
 function formatRelativeTime(dateString?: string): string {
@@ -65,6 +66,7 @@ export function Sidebar({
   onOpenCreateChat,
   onOpenCreateGroup,
   onOpenProfile,
+  onOpenAdmin,
 }: SidebarProps) {
   const { user, logout } = useAuth();
   const [filterQuery, setFilterQuery] = useState("");
@@ -124,6 +126,16 @@ export function Sidebar({
         </button>
 
         <div className="flex items-center gap-1">
+          {user?.role === "admin" && (
+            <button
+              type="button"
+              onClick={onOpenAdmin}
+              title="Open Admin Oversight Console"
+              className="p-2 rounded-xl text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 transition-colors cursor-pointer"
+            >
+              <ShieldIcon className="w-4 h-4" />
+            </button>
+          )}
           <button
             type="button"
             onClick={logout}
@@ -134,6 +146,25 @@ export function Sidebar({
           </button>
         </div>
       </div>
+
+      {/* Admin Menu Entry (Rendered STRICTLY for admin users) */}
+      {user?.role === "admin" && (
+        <div className="px-3 pt-2.5 pb-0.5">
+          <button
+            type="button"
+            onClick={onOpenAdmin}
+            className="w-full flex items-center justify-between py-2 px-3 rounded-xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent hover:from-amber-500/20 hover:to-amber-500/10 border border-amber-200/80 dark:border-amber-800/60 text-amber-800 dark:text-amber-300 text-xs font-semibold transition-all cursor-pointer shadow-xs"
+          >
+            <div className="flex items-center gap-2">
+              <ShieldIcon className="w-4 h-4 text-amber-500 shrink-0" />
+              <span>Admin Console</span>
+            </div>
+            <span className="text-[10px] px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-950/80 text-amber-700 dark:text-amber-400 border border-amber-200/60 dark:border-amber-800/60 font-bold uppercase tracking-wider">
+              Admin
+            </span>
+          </button>
+        </div>
+      )}
 
       {/* Quick Action Buttons */}
       <div className="p-3 grid grid-cols-2 gap-2 border-b border-slate-200/80 dark:border-slate-800/80">

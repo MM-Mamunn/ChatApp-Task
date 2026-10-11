@@ -90,6 +90,54 @@ export interface PaginatedResult<T> {
   };
 }
 
+export interface AdminUserItem {
+  email: string;
+  name: string;
+  avatar_url: string | null;
+  role: "user" | "admin";
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ActivityLogItem {
+  id: string;
+  actor_email: string;
+  action: string;
+  target_type: string | null;
+  target_id: string | null;
+  details: unknown;
+  created_at: string;
+}
+
+export interface AdminDirectConversationSummary {
+  user_a: string;
+  user_b: string;
+  total_messages: number;
+  last_activity: string;
+}
+
+export interface AdminGroupSummary {
+  group_id: string;
+  name: string;
+  creator_email: string;
+  member_count: number;
+  last_activity: string;
+}
+
+export interface AdminConversationsOverview {
+  direct_conversations: AdminDirectConversationSummary[];
+  groups: AdminGroupSummary[];
+}
+
+export interface AdminDirectMessageItem {
+  id: string;
+  sender_email: string;
+  receiver_email: string;
+  message: string;
+  created_at: string;
+}
+
 class ApiClient {
   private accessToken: string | null = null;
   private isRefreshing = false;
@@ -482,6 +530,77 @@ class ApiClient {
         method: "POST",
         body: JSON.stringify({ message }),
       },
+    );
+  }
+
+  // ==========================================
+  // Admin Oversight & Management Methods
+  // ==========================================
+
+  public async listAdminUsers(): Promise<ApiResponse<AdminUserItem[]>> {
+    return this.request<AdminUserItem[]>("/api/admin/users");
+  }
+
+  public async updateUserRole(
+    userEmail: string,
+    role: "user" | "admin",
+  ): Promise<ApiResponse<AdminUserItem>> {
+    return this.request<AdminUserItem>(
+      `/api/admin/users/${encodeURIComponent(userEmail)}/role`,
+      {
+        method: "PATCH",
+        body: JSON.stringify({ role }),
+      },
+    );
+  }
+
+  public async updateUserStatus(
+    userEmail: string,
+    isActive: boolean,
+  ): Promise<ApiResponse<AdminUserItem>> {
+    return this.request<AdminUserItem>(
+      `/api/admin/users/${encodeURIComponent(userEmail)}/status`,
+      {
+        method: "PATCH",
+        body: JSON.stringify({ is_active: isActive }),
+      },
+    );
+  }
+
+  public async listAdminActivity(params?: {
+    limit?: number;
+    before?: string;
+    action?: string;
+  }): Promise<ApiResponse<ActivityLogItem[]>> {
+    const q = new URLSearchParams();
+    if (params?.limit) q.set("limit", String(params.limit));
+    if (params?.before) q.set("before", params.before);
+    if (params?.action) q.set("action", params.action);
+    const qs = q.toString() ? `?${q.toString()}` : "";
+
+    return this.request<ActivityLogItem[]>(`/api/admin/activity${qs}`);
+  }
+
+  public async listAdminConversations(): Promise<
+    ApiResponse<AdminConversationsOverview>
+  > {
+    return this.request<AdminConversationsOverview>("/api/admin/conversations");
+  }
+
+  public async getAdminDirectMessages(
+    userA: string,
+    userB: string,
+    params?: { limit?: number; before?: string },
+  ): Promise<ApiResponse<AdminDirectMessageItem[]>> {
+    const q = new URLSearchParams();
+    if (params?.limit) q.set("limit", String(params.limit));
+    if (params?.before) q.set("before", params.before);
+    const qs = q.toString() ? `?${q.toString()}` : "";
+
+    return this.request<AdminDirectMessageItem[]>(
+      `/api/admin/conversations/direct/${encodeURIComponent(
+        userA,
+      )}/${encodeURIComponent(userB)}/messages${qs}`,
     );
   }
 }
