@@ -11,9 +11,11 @@
     "format:check": "prettier --check .",
     "db:generate": "drizzle-kit generate --config api/database/drizzle.config.ts",
     "db:migrate": "drizzle-kit migrate --config api/database/drizzle.config.ts",
-    "db:studio": "drizzle-kit studio --config api/database/drizzle.config.ts"
+    "db:studio": "drizzle-kit studio --config api/database/drizzle.config.ts",
+    "db:seed": "tsx api/database/seed.ts"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "drizzle-orm": "^0.45.4",
     "framer-motion": "^14.1.0",
     "jose": "^6.2.12",
@@ -24,6 +26,7 @@
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",
+    "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

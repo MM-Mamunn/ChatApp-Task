@@ -3,6 +3,7 @@ export {
   getJwtAccessSecret,
   getJwtRefreshSecret,
 } from "./jwt.config";
+export { BCRYPT_SALT_ROUNDS, hashPassword, verifyPassword } from "./password";
 export {
   createAccessToken,
   verifyAccessToken,
