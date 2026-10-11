@@ -74,6 +74,7 @@ export interface GroupItem {
 }
 
 export interface GroupMessageItem {
+  id?: string;
   group_id: string;
   sender_email: string;
   message: string;

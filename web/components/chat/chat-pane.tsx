@@ -8,6 +8,7 @@ import {
   type DirectMessageItem,
   type GroupMessageItem,
 } from "@/lib/api-client";
+import { getSupabaseClient } from "@/lib/supabase-client";
 import { Avatar } from "../ui/avatar";
 import {
   SendIcon,
@@ -170,6 +171,138 @@ export function ChatPane({
     };
   }, [loadMessages]);
 
+  // Supabase Realtime subscription for live incoming messages
+  useEffect(() => {
+    if (!activeTarget || !currentUser) return;
+
+    const supabase = getSupabaseClient();
+    if (!supabase) return;
+
+    if (activeTarget.type === "direct") {
+      const currentEmail = currentUser.email.toLowerCase();
+      const otherEmail = activeTarget.recipientEmail.toLowerCase();
+      const channelId = `chat-direct-${[currentEmail, otherEmail].sort().join("--")}`;
+
+      const channel = supabase.channel(channelId);
+
+      channel.on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "direct_messages",
+        },
+        (payload) => {
+          const row = payload.new as {
+            id: string;
+            sender_email: string;
+            receiver_email: string;
+            message: string;
+            created_at: string;
+          };
+
+          if (!row || !row.id) return;
+
+          const sender = row.sender_email.toLowerCase();
+          const receiver = row.receiver_email.toLowerCase();
+
+          // Ensure message belongs to this active pair
+          const belongsToPair =
+            (sender === otherEmail && receiver === currentEmail) ||
+            (sender === currentEmail && receiver === otherEmail);
+
+          if (!belongsToPair) return;
+
+          setMessages((prev) => {
+            if (prev.some((m) => m.id === row.id)) {
+              return prev;
+            }
+            const newMsg: UnifiedMessage = {
+              id: row.id,
+              sender_email: row.sender_email,
+              message: row.message,
+              created_at: row.created_at,
+              isSelf: sender === currentEmail,
+            };
+            return [...prev, newMsg];
+          });
+
+          onMessageSentSuccess?.();
+        },
+      );
+
+      channel.subscribe();
+
+      return () => {
+        void supabase.removeChannel(channel);
+      };
+    }
+
+    if (activeTarget.type === "group") {
+      const gId = activeTarget.groupId;
+      if (!gId || gId === "undefined") return;
+
+      const channelId = `chat-group-${gId}`;
+      const channel = supabase.channel(channelId);
+
+      channel.on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "group_chat_messages",
+          filter: `group_id=eq.${gId}`,
+        },
+        (payload) => {
+          const row = payload.new as {
+            id?: string;
+            group_id: string;
+            sender_email: string;
+            message: string;
+            created_at: string;
+          };
+
+          if (!row || row.group_id !== gId) return;
+
+          const currentEmail = currentUser.email.toLowerCase();
+          const sender = row.sender_email.toLowerCase();
+          const messageId =
+            row.id || `${row.group_id}-${row.created_at}-${row.sender_email}`;
+
+          setMessages((prev) => {
+            if (
+              prev.some(
+                (m) =>
+                  m.id === messageId ||
+                  (m.created_at === row.created_at &&
+                    m.sender_email.toLowerCase() === sender &&
+                    m.message === row.message),
+              )
+            ) {
+              return prev;
+            }
+            const newMsg: UnifiedMessage = {
+              id: messageId,
+              sender_email: row.sender_email,
+              message: row.message,
+              created_at: row.created_at,
+              isSelf: sender === currentEmail,
+            };
+            return [...prev, newMsg];
+          });
+
+          onMessageSentSuccess?.();
+        },
+      );
+
+      channel.subscribe();
+
+      return () => {
+        void supabase.removeChannel(channel);
+      };
+    }
+  }, [activeTarget, currentUser, onMessageSentSuccess]);
+
   // Safe auto-scroll: detect if user scrolled up
   const handleScroll = () => {
     const el = scrollContainerRef.current;
@@ -296,7 +429,9 @@ export function ChatPane({
             created_at: res.data.created_at,
             isSelf: true,
           };
-          setMessages((prev) => [...prev, newMsg]);
+          setMessages((prev) =>
+            prev.some((m) => m.id === newMsg.id) ? prev : [...prev, newMsg],
+          );
           setInputText("");
           scrollToBottom(true);
           onMessageSentSuccess?.();
@@ -309,14 +444,25 @@ export function ChatPane({
           trimmed,
         );
         if (res.success && res.data) {
+          const msgId =
+            res.data.id || `${res.data.group_id}-${res.data.created_at}`;
           const newMsg: UnifiedMessage = {
-            id: `${res.data.group_id}-${res.data.created_at}-${Date.now()}`,
+            id: msgId,
             sender_email: res.data.sender_email,
             message: res.data.message,
             created_at: res.data.created_at,
             isSelf: true,
           };
-          setMessages((prev) => [...prev, newMsg]);
+          setMessages((prev) =>
+            prev.some(
+              (m) =>
+                m.id === msgId ||
+                (m.created_at === newMsg.created_at &&
+                  m.message === newMsg.message),
+            )
+              ? prev
+              : [...prev, newMsg],
+          );
           setInputText("");
           scrollToBottom(true);
           onMessageSentSuccess?.();

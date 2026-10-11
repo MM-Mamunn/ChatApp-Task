@@ -41,6 +41,7 @@ export interface GroupItem {
 }
 
 export interface GroupMessageItem {
+  id?: string;
   group_id: string;
   sender_email: string;
   message: string;
@@ -589,6 +590,7 @@ export async function getGroupMessages(
 
   return {
     data: resultRows.map((m) => ({
+      id: m.id,
       group_id: m.groupId,
       sender_email: m.senderEmail,
       message: m.message,
@@ -668,6 +670,7 @@ export async function sendGroupMessage(
     .returning();
 
   return {
+    id: inserted.id,
     group_id: inserted.groupId,
     sender_email: inserted.senderEmail,
     message: inserted.message,

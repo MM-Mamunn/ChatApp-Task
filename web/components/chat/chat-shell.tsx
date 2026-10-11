@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/lib/auth-context";
+import { getSupabaseClient } from "@/lib/supabase-client";
 import {
   apiClient,
   type DirectConversationItem,
@@ -14,7 +15,7 @@ import { CreateGroupModal } from "./create-group-modal";
 import { ProfileModal } from "./profile-modal";
 
 export function ChatShell() {
-  const { isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useAuth();
 
   const [directList, setDirectList] = useState<DirectConversationItem[]>([]);
   const [groupList, setGroupList] = useState<GroupItem[]>([]);
@@ -57,16 +58,64 @@ export function ChatShell() {
       }
     });
 
-    // Auto-refresh conversations periodically (every 4 seconds) to detect incoming messages
-    const interval = setInterval(() => {
-      refreshConversations();
-    }, 4000);
-
     return () => {
       active = false;
-      clearInterval(interval);
     };
   }, [refreshConversations]);
+
+  // Supabase Realtime subscription for live conversation list updates
+  useEffect(() => {
+    if (!isAuthenticated || !user?.email) return;
+
+    const supabase = getSupabaseClient();
+    if (!supabase) return;
+
+    const userEmail = user.email.toLowerCase();
+    const channelName = `inbox:${userEmail}`;
+    const channel = supabase.channel(channelName);
+
+    channel
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "direct_messages",
+        },
+        (payload) => {
+          const row = payload.new as {
+            sender_email?: string;
+            receiver_email?: string;
+          };
+          if (!row) return;
+          const sender = (row.sender_email || "").toLowerCase();
+          const receiver = (row.receiver_email || "").toLowerCase();
+
+          // Refresh conversation list if user is sender or receiver
+          if (sender === userEmail || receiver === userEmail) {
+            refreshConversations();
+          }
+        },
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "group_chat_messages",
+        },
+        () => {
+          // A group message was sent; refresh conversation list
+          refreshConversations();
+        },
+      );
+
+    channel.subscribe();
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [isAuthenticated, user?.email, refreshConversations]);
 
   // When a new conversation is started via CreateChatModal
   const handleDirectConversationStarted = (recipient: {

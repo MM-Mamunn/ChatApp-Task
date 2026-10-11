@@ -39,11 +39,12 @@ export const directMessages = pgTable(
 
 /**
  * Group chat messages table.
- * Preserved with NO PRIMARY KEY as specified in API.md and project requirements.
+ * Includes unique surrogate ID primary key for Supabase Realtime logical replication and event tracking.
  */
 export const groupChatMessages = pgTable(
   "group_chat_messages",
   {
+    id: uuid("id").defaultRandom().primaryKey(),
     groupId: uuid("group_id")
       .notNull()
       .references(() => groups.groupId),

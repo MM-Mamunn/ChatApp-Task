@@ -16,9 +16,11 @@
     "test:security": "tsx api/test/security-baseline.test.ts",
     "test:auth": "tsx api/test/auth.test.ts",
     "test:rbac": "tsx api/test/rbac-admin.test.ts",
-    "test:chat": "tsx api/test/chat.test.ts"
+    "test:chat": "tsx api/test/chat.test.ts",
+    "test:realtime": "tsx api/test/realtime.test.ts"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.117.3",
     "bcryptjs": "^3.0.3",
     "drizzle-orm": "^0.45.4",
     "framer-motion": "^14.1.0",
