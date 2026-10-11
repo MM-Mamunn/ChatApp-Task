@@ -62,46 +62,27 @@ The repository root houses project specifications, implementation roadmaps, agen
     ├── .prettierrc                 # Prettier code formatting rules
     ├── .prettierignore             # Prettier ignore patterns
     ├── .gitignore                  # Web-level gitignore
-    ├── .env.example                # Web-level env reference pointing to root .env
+    ├── .env.example                # Web-level environment variable template
+    ├── .env                        # Local development secrets (gitignored)
     ├── app/                        # Next.js App Router pages, layouts, and HTTP routes
     │   ├── layout.tsx              # Root HTML and body layout
     │   ├── page.tsx                # Home landing/scaffold page
     │   ├── globals.css             # Tailwind stylesheet
     │   ├── favicon.ico             # App icon
-    │   └── api/                    # Next.js Route Handlers exposing HTTP endpoints
-    │       └── hello/
-    │           └── route.ts        # GET /api/hello entry point delegating to web/api
+    │   └── api/                    # Route Handlers serving as single route layer
+    │       ├── auth/               # Endpoints: register, login, refresh, logout, bootstrap-admin
+    │       └── hello/              # GET /api/hello entry point delegating to web/api
     ├── api/                        # Modular backend API architecture inside web/
     │   ├── index.ts                # Central barrel export for the API layers
-    │   ├── authentication/         # JWT secret retrieval, access token creation & verification
-    │   │   ├── index.ts
-    │   │   ├── jwt.config.ts       # JWT secrets and TTL constants
-    │   │   └── tokens.ts           # SignJWT and jwtVerify helpers via jose
-    │   ├── configuration/          # Centralized environment variable validation
-    │   │   ├── index.ts
-    │   │   └── env.ts              # requireEnv, optionalEnv, and MissingEnvError
+    │   ├── authentication/         # JWT secret retrieval, access/refresh tokens, cookies, bcrypt
+    │   ├── configuration/          # Centralized environment validation and CORS allowlist
     │   ├── controllers/            # HTTP request/response handlers and orchestration
-    │   │   ├── index.ts
-    │   │   └── hello.controller.ts # Formats and returns Response.json
-    │   ├── database/               # Drizzle ORM configuration, client, and schemas
-    │   │   ├── index.ts
-    │   │   ├── client.ts           # Drizzle client singleton (postgres-js)
-    │   │   ├── drizzle.config.ts   # Drizzle Kit migration and schema configuration
-    │   │   ├── migrations/         # Generated SQL schema migrations
-    │   │   │   └── .gitkeep
-    │   │   └── schema/             # Drizzle PostgreSQL table schema definitions
-    │   │       └── index.ts
-    │   ├── middlewares/            # Reusable request processing, auth, and RBAC
-    │   │   ├── index.ts
-    │   │   ├── auth.middleware.ts  # withAuth Bearer token verification
-    │   │   ├── authorize.middleware.ts # withRoles role-based access control
-    │   │   └── types.ts            # ApiContext and ApiHandler definitions
-    │   ├── routes/                 # Protocol-agnostic route handler definitions
-    │   │   ├── index.ts
-    │   │   └── hello.route.ts      # Connects controllers to endpoints
-    │   └── services/               # Core business logic and database operations
-    │       ├── index.ts
-    │       └── hello.service.ts    # Independent business logic
+    │   ├── database/               # Drizzle ORM client, schemas, migrations, and seed scripts
+    │   ├── errors/                 # Standard error codes, custom error hierarchy (AppError)
+    │   ├── middlewares/            # Reusable HTTP middlewares (withSecurity, withAuth, withRoles)
+    │   ├── services/               # Core business logic and database operations
+    │   ├── utils/                  # Standard response envelopes and safe request parsers
+    │   └── validation/             # Zod validation utilities for body, query, and params
     ├── components/                 # Reusable React UI components
     │   └── foundation-status.tsx   # Visual status card for verification
     ├── lib/                        # Shared client and server helper utilities
@@ -200,7 +181,7 @@ The application follows a clean, decoupled layered architecture inside Next.js:
 
 ## Data Flow & Direction of Dependencies
 
-1. **Inward Dependencies:** Outer transport layers (`app/api`) depend on inner API layers (`routes` -> `controllers` -> `services` -> `database`).
+1. **Inward Dependencies:** Outer transport layers (`app/api`) depend on inner API layers (`controllers` -> `services` -> `database`).
 2. **Never Upward:** Services never import controllers or Next.js route handlers.
 3. **Database Isolation:** Database queries occur strictly in services or database helpers, never directly inside UI components or Next.js route handlers.
 4. **Secrets Isolation:** Server secrets (`DATABASE_URL`, `JWT_ACCESS_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`) are accessed strictly through server modules (`web/api/configuration/env.ts`) and must NEVER be imported into React client components or exposed with `NEXT_PUBLIC_`.
