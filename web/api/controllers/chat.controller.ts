@@ -273,9 +273,18 @@ export async function getGroupMessagesController(
   }
 
   const resolved = await resolveParams(context);
-  const groupId = typeof resolved.groupId === "string" ? resolved.groupId : "";
+  const groupId =
+    typeof resolved.groupId === "string" ? resolved.groupId.trim() : "";
   if (!groupId) {
     return apiError("VALIDATION_ERROR", "groupId is required", 400);
+  }
+
+  const UUID_REGEX =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!UUID_REGEX.test(groupId)) {
+    return apiError("VALIDATION_ERROR", "Invalid groupId format", 400, [
+      { field: "groupId", issue: "Must be a valid UUID" },
+    ]);
   }
 
   const validation = validateQuery(request, paginationQuerySchema);
@@ -309,9 +318,18 @@ export async function sendGroupMessageController(
   }
 
   const resolved = await resolveParams(context);
-  const groupId = typeof resolved.groupId === "string" ? resolved.groupId : "";
+  const groupId =
+    typeof resolved.groupId === "string" ? resolved.groupId.trim() : "";
   if (!groupId) {
     return apiError("VALIDATION_ERROR", "groupId is required", 400);
+  }
+
+  const UUID_REGEX =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!UUID_REGEX.test(groupId)) {
+    return apiError("VALIDATION_ERROR", "Invalid groupId format", 400, [
+      { field: "groupId", issue: "Must be a valid UUID" },
+    ]);
   }
 
   const validation = await validateBody(request, sendGroupMessageSchema);

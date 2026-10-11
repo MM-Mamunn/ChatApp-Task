@@ -283,18 +283,19 @@ export function Sidebar({
                   </p>
                 )}
                 {filteredGroups.map((group) => {
+                  const resolvedGroupId = group.group_id || group.id;
                   const isActive =
                     activeTarget?.type === "group" &&
-                    activeTarget.groupId === group.id;
+                    activeTarget.groupId === resolvedGroupId;
 
                   return (
                     <button
-                      key={group.id}
+                      key={resolvedGroupId}
                       type="button"
                       onClick={() =>
                         onSelectTarget({
                           type: "group",
-                          groupId: group.id,
+                          groupId: resolvedGroupId,
                           groupName: group.name,
                           memberCount: group.member_count,
                         })

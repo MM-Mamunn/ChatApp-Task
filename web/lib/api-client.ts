@@ -57,11 +57,14 @@ export interface DirectMessageItem {
 
 export interface GroupItem {
   id: string;
+  group_id: string;
   name: string;
-  created_by: string;
+  created_by?: string;
+  creator_email?: string;
   created_at: string;
-  updated_at: string;
+  updated_at?: string;
   member_count: number;
+  participants?: string[];
   members?: Array<{
     user_email: string;
     name?: string;
@@ -341,24 +344,117 @@ class ApiClient {
   }
 
   // Group Conversations
-  public async listGroups() {
-    return this.request<GroupItem[]>("/api/groups");
+  public async listGroups(): Promise<ApiResponse<GroupItem[]>> {
+    const res = await this.request<
+      Array<{
+        id?: string;
+        group_id?: string;
+        name: string;
+        created_by?: string;
+        creator_email?: string;
+        created_at: string;
+        updated_at?: string;
+        member_count?: number;
+        participants?: string[];
+        members?: Array<{
+          user_email: string;
+          name?: string;
+          role_in_group: string;
+          joined_at: string;
+        }>;
+      }>
+    >("/api/groups");
+
+    if (res.success && Array.isArray(res.data)) {
+      const normalized: GroupItem[] = res.data.map((g) => {
+        const resolvedId = g.group_id || g.id || "";
+        return {
+          id: resolvedId,
+          group_id: resolvedId,
+          name: g.name,
+          creator_email: g.creator_email || g.created_by,
+          created_by: g.created_by || g.creator_email,
+          created_at: g.created_at,
+          updated_at: g.updated_at || g.created_at,
+          member_count:
+            g.member_count ?? (g.participants ? g.participants.length : 1),
+          participants: g.participants,
+          members: g.members,
+        };
+      });
+      return {
+        ...res,
+        data: normalized,
+      };
+    }
+    return res as ApiResponse<GroupItem[]>;
   }
 
   public async createGroup(payload: {
     name: string;
     participant_emails: string[];
-  }) {
-    return this.request<GroupItem>("/api/groups", {
+  }): Promise<ApiResponse<GroupItem>> {
+    const res = await this.request<{
+      id?: string;
+      group_id?: string;
+      name: string;
+      created_by?: string;
+      creator_email?: string;
+      created_at: string;
+      updated_at?: string;
+      member_count?: number;
+      participants?: string[];
+      members?: Array<{
+        user_email: string;
+        name?: string;
+        role_in_group: string;
+        joined_at: string;
+      }>;
+    }>("/api/groups", {
       method: "POST",
       body: JSON.stringify(payload),
     });
+
+    if (res.success && res.data) {
+      const g = res.data;
+      const resolvedId = g.group_id || g.id || "";
+      const normalized: GroupItem = {
+        id: resolvedId,
+        group_id: resolvedId,
+        name: g.name,
+        creator_email: g.creator_email || g.created_by,
+        created_by: g.created_by || g.creator_email,
+        created_at: g.created_at,
+        updated_at: g.updated_at || g.created_at,
+        member_count:
+          g.member_count ??
+          (g.participants
+            ? g.participants.length
+            : payload.participant_emails.length + 1),
+        participants: g.participants,
+        members: g.members,
+      };
+      return {
+        ...res,
+        data: normalized,
+      };
+    }
+    return res as ApiResponse<GroupItem>;
   }
 
   public async getGroupMessages(
     groupId: string,
     params?: { limit?: number; before?: string },
   ) {
+    if (!groupId || groupId === "undefined") {
+      return {
+        success: false,
+        error: {
+          code: "VALIDATION_ERROR",
+          message: "A valid group ID is required to fetch messages.",
+        },
+      };
+    }
     const q = new URLSearchParams();
     if (params?.limit) q.set("limit", String(params.limit));
     if (params?.before) q.set("before", params.before);
@@ -370,6 +466,15 @@ class ApiClient {
   }
 
   public async sendGroupMessage(groupId: string, message: string) {
+    if (!groupId || groupId === "undefined") {
+      return {
+        success: false,
+        error: {
+          code: "VALIDATION_ERROR",
+          message: "A valid group ID is required to send messages.",
+        },
+      };
+    }
     return this.request<GroupMessageItem>(
       `/api/groups/${encodeURIComponent(groupId)}/messages`,
       {

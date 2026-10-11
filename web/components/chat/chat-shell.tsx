@@ -85,9 +85,10 @@ export function ChatShell() {
 
   // When a new group is created via CreateGroupModal
   const handleGroupCreated = (group: GroupItem) => {
+    const resolvedGroupId = group.group_id || group.id;
     setActiveTarget({
       type: "group",
-      groupId: group.id,
+      groupId: resolvedGroupId,
       groupName: group.name,
       memberCount: group.member_count,
     });

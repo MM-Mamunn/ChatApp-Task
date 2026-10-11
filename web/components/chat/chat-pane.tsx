@@ -74,6 +74,9 @@ export function ChatPane({
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [isLoadingEarlier, setIsLoadingEarlier] = useState(false);
 
+  // Load error
+  const [loadError, setLoadError] = useState<string | null>(null);
+
   // Composer
   const [inputText, setInputText] = useState("");
   const [isSending, setIsSending] = useState(false);
@@ -91,6 +94,7 @@ export function ChatPane({
 
     setIsLoading(true);
     setSendError(null);
+    setLoadError(null);
     isInitialLoadRef.current = true;
 
     try {
@@ -112,9 +116,18 @@ export function ChatPane({
           setMessages(chron);
           setHasMore(!!res.pagination?.has_more);
           setNextCursor(res.pagination?.next_cursor || null);
+        } else {
+          setLoadError(res.error?.message || "Failed to load messages");
         }
       } else {
-        const res = await apiClient.getGroupMessages(activeTarget.groupId, {
+        const gId = activeTarget.groupId;
+        if (!gId || gId === "undefined") {
+          setLoadError("Invalid group channel ID");
+          setIsLoading(false);
+          return;
+        }
+
+        const res = await apiClient.getGroupMessages(gId, {
           limit: 25,
         });
         if (res.success && res.data) {
@@ -132,10 +145,14 @@ export function ChatPane({
           setMessages(chron);
           setHasMore(!!res.pagination?.has_more);
           setNextCursor(res.pagination?.next_cursor || null);
+        } else {
+          setLoadError(res.error?.message || "Failed to load group messages");
         }
       }
-    } catch {
-      // Failed to load messages
+    } catch (err: unknown) {
+      setLoadError(
+        err instanceof Error ? err.message : "Failed to load messages",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -416,6 +433,25 @@ export function ChatPane({
           <div className="flex flex-col items-center justify-center py-20 text-slate-400">
             <Loader2Icon className="w-6 h-6 animate-spin text-indigo-500 mb-2" />
             <span className="text-xs">Loading conversation history...</span>
+          </div>
+        ) : loadError ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center text-slate-400">
+            <div className="w-12 h-12 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-500 flex items-center justify-center mb-3">
+              <MessageSquareIcon className="w-6 h-6 opacity-80" />
+            </div>
+            <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
+              Unable to load messages
+            </p>
+            <p className="text-xs text-rose-500 dark:text-rose-400 mt-1 max-w-sm px-4">
+              {loadError}
+            </p>
+            <button
+              type="button"
+              onClick={() => void loadMessages()}
+              className="mt-4 px-4 py-1.5 text-xs font-semibold rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white shadow-xs cursor-pointer transition-colors"
+            >
+              Retry
+            </button>
           </div>
         ) : messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center text-slate-400">
