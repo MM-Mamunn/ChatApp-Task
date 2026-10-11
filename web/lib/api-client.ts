@@ -73,7 +73,6 @@ export interface GroupItem {
 export interface GroupMessageItem {
   group_id: string;
   sender_email: string;
-  receiver_email?: string | null;
   message: string;
   created_at: string;
 }

@@ -8,6 +8,13 @@
       "when": 1791695243669,
       "tag": "0000_demonic_nitro",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791732018045,
+      "tag": "0001_friendly_riptide",
+      "breakpoints": true
     }
   ]
 }

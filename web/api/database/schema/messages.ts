@@ -50,9 +50,6 @@ export const groupChatMessages = pgTable(
     senderEmail: varchar("sender_email", { length: 255 })
       .notNull()
       .references(() => users.email),
-    receiverEmail: varchar("receiver_email", { length: 255 })
-      .notNull()
-      .references(() => users.email),
     message: text("message").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
@@ -64,7 +61,6 @@ export const groupChatMessages = pgTable(
       table.createdAt,
     ),
     index("idx_group_chat_messages_sender").on(table.senderEmail),
-    index("idx_group_chat_messages_receiver").on(table.receiverEmail),
   ],
 );
 

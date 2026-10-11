@@ -588,7 +588,6 @@ The seed script (`npm run db:seed`) provides authentic test accounts:
       {
         "group_id": "84c8a291-7f89-498c-b03a-330fe53f7f50",
         "sender_email": "alex@example.com",
-        "receiver_email": "sam@example.com",
         "message": "Welcome team to the launch channel!",
         "created_at": "2026-10-11T13:36:00.000Z"
       }
@@ -616,11 +615,9 @@ The seed script (`npm run db:seed`) provides authentic test accounts:
 - **Request Body:**
   ```json
   {
-    "message": "Welcome team to the launch channel!",
-    "receiver_email": "sam@example.com"
+    "message": "Welcome team to the launch channel!"
   }
   ```
-  *(Note: `receiver_email` is optional; if omitted, defaults automatically to another group member or creator).*
 - **Expected Success (201 Created):**
   ```json
   {
@@ -628,7 +625,6 @@ The seed script (`npm run db:seed`) provides authentic test accounts:
     "data": {
       "group_id": "84c8a291-7f89-498c-b03a-330fe53f7f50",
       "sender_email": "alex@example.com",
-      "receiver_email": "sam@example.com",
       "message": "Welcome team to the launch channel!",
       "created_at": "2026-10-11T13:36:00.000Z"
     }

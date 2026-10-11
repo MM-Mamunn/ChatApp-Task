@@ -148,13 +148,11 @@ export async function runSeed(): Promise<void> {
       {
         groupId: SEED_GROUP_ID,
         senderEmail: "admin@chat.local",
-        receiverEmail: "alice@chat.local",
         message: "Welcome everyone to the Engineering Team group channel!",
       },
       {
         groupId: SEED_GROUP_ID,
         senderEmail: "alice@chat.local",
-        receiverEmail: "admin@chat.local",
         message: "Thanks! Happy to be here.",
       },
     ]);

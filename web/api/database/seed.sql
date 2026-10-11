@@ -94,18 +94,16 @@ BEGIN
     SELECT 1 FROM "group_chat_messages" 
     WHERE "group_id" = '00000000-0000-0000-0000-000000000001'
   ) THEN
-    INSERT INTO "group_chat_messages" ("group_id", "sender_email", "receiver_email", "message")
+    INSERT INTO "group_chat_messages" ("group_id", "sender_email", "message")
     VALUES
       (
         '00000000-0000-0000-0000-000000000001',
         'admin@chat.local',
-        'alice@chat.local',
         'Welcome everyone to the Engineering Team group channel!'
       ),
       (
         '00000000-0000-0000-0000-000000000001',
         'alice@chat.local',
-        'admin@chat.local',
         'Thanks! Happy to be here.'
       );
   END IF;

@@ -402,7 +402,6 @@ async function runChatTests() {
         },
         body: JSON.stringify({
           message: "Welcome team to the new project group!",
-          receiver_email: userBEmail,
         }),
       },
     );
@@ -414,6 +413,11 @@ async function runChatTests() {
     assert.strictEqual(memberSendBody.success, true);
     assert.strictEqual(memberSendBody.data.group_id, testGroupId);
     assert.strictEqual(memberSendBody.data.sender_email, userAEmail);
+    assert.strictEqual(
+      memberSendBody.data.receiver_email,
+      undefined,
+      "Group message response must not have receiver_email",
+    );
     assert.strictEqual(
       memberSendBody.data.message,
       "Welcome team to the new project group!",
@@ -454,7 +458,11 @@ async function runChatTests() {
     assert.strictEqual(memberReadRes.status, 200);
     const memberReadBody = await memberReadRes.json();
     assert.strictEqual(memberReadBody.success, true);
-    assert.strictEqual(memberReadBody.data.length, 1);
+    assert.strictEqual(
+      memberReadBody.data[0].receiver_email,
+      undefined,
+      "Group message history must not include receiver_email",
+    );
     assert.strictEqual(
       memberReadBody.data[0].message,
       "Welcome team to the new project group!",

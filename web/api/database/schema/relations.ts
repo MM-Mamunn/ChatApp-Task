@@ -70,11 +70,6 @@ export const groupChatMessagesRelations = relations(
       references: [users.email],
       relationName: "groupSender",
     }),
-    receiver: one(users, {
-      fields: [groupChatMessages.receiverEmail],
-      references: [users.email],
-      relationName: "groupReceiver",
-    }),
   }),
 );
 

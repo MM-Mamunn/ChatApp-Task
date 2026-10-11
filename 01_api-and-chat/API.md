@@ -134,13 +134,12 @@ Represents multi-user group chat channels.
 
 ### 2.5 Table: `group_chat_messages` (Preserved As Specified)
 
-Stores messages sent within group channels.
+Stores messages sent within group channels. Message recipients are determined by group membership (`group_members`).
 
 | Column | Type | Constraints | Description |
 |---|---|---|---|
 | `group_id` | `uuid` | **NOT NULL**, **FK** `groups(group_id)` | Channel reference |
 | `sender_email` | `varchar(255)` | **NOT NULL**, **FK** `users(email)` | Message author |
-| `receiver_email` | `varchar(255)` | **NOT NULL**, **FK** `users(email)` | Intended recipient or group member reference |
 | `message` | `text` | **NOT NULL** | Text content (non-empty, non-whitespace) |
 | `created_at` | `timestamp with time zone` | **NOT NULL**, default `now()` | Send timestamp |
 
@@ -805,7 +804,6 @@ List endpoints for messages and activity logs utilize **timestamp cursor paginat
       {
         "group_id": "84c8a291-7f89-498c-b03a-330fe53f7f50",
         "sender_email": "alice@example.com",
-        "receiver_email": "user@example.com",
         "message": "I uploaded the sketches.",
         "created_at": "2026-10-11T09:55:00.000Z"
       }
@@ -829,8 +827,7 @@ List endpoints for messages and activity logs utilize **timestamp cursor paginat
 - **Request Body:**
   ```json
   {
-    "message": "Thanks Alice, reviewing now!",
-    "receiver_email": "alice@example.com"
+    "message": "Thanks Alice, reviewing now!"
   }
   ```
 - **Response (201 Created):**
@@ -840,7 +837,6 @@ List endpoints for messages and activity logs utilize **timestamp cursor paginat
     "data": {
       "group_id": "84c8a291-7f89-498c-b03a-330fe53f7f50",
       "sender_email": "user@example.com",
-      "receiver_email": "alice@example.com",
       "message": "Thanks Alice, reviewing now!",
       "created_at": "2026-10-11T09:56:00.000Z"
     }

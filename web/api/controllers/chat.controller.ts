@@ -60,7 +60,6 @@ const sendGroupMessageSchema = z.object({
     .refine((val) => val.trim().length > 0, {
       message: "Message cannot be empty or whitespace only",
     }),
-  receiver_email: z.string().email("Invalid receiver email address").optional(),
 });
 
 function handleControllerError(err: unknown): Response {
@@ -325,7 +324,6 @@ export async function sendGroupMessageController(
       context.userId,
       groupId,
       validation.data.message,
-      validation.data.receiver_email,
     );
     return apiSuccess(newMessage, { status: 201 });
   } catch (err) {

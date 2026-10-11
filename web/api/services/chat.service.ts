@@ -43,7 +43,6 @@ export interface GroupItem {
 export interface GroupMessageItem {
   group_id: string;
   sender_email: string;
-  receiver_email: string;
   message: string;
   created_at: Date;
 }
@@ -592,7 +591,6 @@ export async function getGroupMessages(
     data: resultRows.map((m) => ({
       group_id: m.groupId,
       sender_email: m.senderEmail,
-      receiver_email: m.receiverEmail,
       message: m.message,
       created_at: m.createdAt,
     })),
@@ -612,7 +610,6 @@ export async function sendGroupMessage(
   senderEmail: string,
   groupId: string,
   message: string,
-  receiverEmail?: string,
 ): Promise<GroupMessageItem> {
   const db = getDb();
   const normalizedSender = senderEmail.toLowerCase().trim();
@@ -660,45 +657,12 @@ export async function sendGroupMessage(
     throw new ForbiddenError("You are not a member of this group");
   }
 
-  // 3. Resolve receiver_email (required by group_chat_messages schema)
-  let resolvedReceiver = receiverEmail?.toLowerCase().trim();
-  if (!resolvedReceiver) {
-    // If not explicitly provided, find another member in the group (or default to creator)
-    const otherMembers = await db
-      .select({ userEmail: groupMembers.userEmail })
-      .from(groupMembers)
-      .where(
-        and(
-          eq(groupMembers.groupId, groupId),
-          sql`${groupMembers.userEmail} != ${normalizedSender}`,
-        ),
-      )
-      .limit(1);
-
-    resolvedReceiver =
-      otherMembers.length > 0
-        ? otherMembers[0].userEmail
-        : groupRows[0].creatorEmail;
-  } else {
-    // Verify receiver exists
-    const recUser = await db
-      .select({ email: users.email })
-      .from(users)
-      .where(eq(users.email, resolvedReceiver))
-      .limit(1);
-
-    if (recUser.length === 0) {
-      throw new NotFoundError("Receiver does not exist");
-    }
-  }
-
-  // 4. Insert into group_chat_messages
+  // 3. Insert into group_chat_messages
   const [inserted] = await db
     .insert(groupChatMessages)
     .values({
       groupId,
       senderEmail: normalizedSender,
-      receiverEmail: resolvedReceiver,
       message: trimmedMessage,
     })
     .returning();
@@ -706,7 +670,6 @@ export async function sendGroupMessage(
   return {
     group_id: inserted.groupId,
     sender_email: inserted.senderEmail,
-    receiver_email: inserted.receiverEmail,
     message: inserted.message,
     created_at: inserted.createdAt,
   };
