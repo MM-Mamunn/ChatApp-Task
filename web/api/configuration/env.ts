@@ -6,16 +6,18 @@ import { z } from "zod";
 let loaded = false;
 
 function findEnvFile(): string | null {
-  if (process.env.NEXT_RUNTIME) {
+  if (process.env.DATABASE_URL && process.env.JWT_ACCESS_SECRET) {
     return null;
   }
   const candidates = [
-    path.resolve(/*turbopackIgnore: true*/ __dirname, "../../.."),
-    path.resolve(/*turbopackIgnore: true*/ process.cwd(), ".."),
     process.cwd(),
-    path.resolve(/*turbopackIgnore: true*/ __dirname, "../.."),
+    path.resolve(process.cwd(), ".."),
+    path.resolve(__dirname, "../../.."),
+    path.resolve(__dirname, "../.."),
   ];
   for (const dir of candidates) {
+    const envLocal = path.join(dir, ".env.local");
+    if (fs.existsSync(envLocal)) return envLocal;
     const envPath = path.join(dir, ".env");
     if (fs.existsSync(envPath)) return envPath;
   }
@@ -70,6 +72,10 @@ export const serverEnvSchema = z.object({
   ADMIN_BOOTSTRAP_EMAIL: z
     .string()
     .email("ADMIN_BOOTSTRAP_EMAIL must be a valid email address")
+    .optional(),
+  ADMIN_BOOTSTRAP_SECRET: z
+    .string()
+    .min(8, "ADMIN_BOOTSTRAP_SECRET must be at least 8 characters")
     .optional(),
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),

@@ -13,7 +13,8 @@
     "db:migrate": "drizzle-kit migrate --config api/database/drizzle.config.ts",
     "db:studio": "drizzle-kit studio --config api/database/drizzle.config.ts",
     "db:seed": "tsx api/database/seed.ts",
-    "test:security": "tsx api/test/security-baseline.test.ts"
+    "test:security": "tsx api/test/security-baseline.test.ts",
+    "test:auth": "tsx api/test/auth.test.ts"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

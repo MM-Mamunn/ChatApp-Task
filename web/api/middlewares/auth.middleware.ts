@@ -1,10 +1,14 @@
+import { eq } from "drizzle-orm";
 import { verifyAccessToken } from "../authentication/tokens";
-import { unauthorizedResponse } from "../utils/response";
+import { getDb } from "../database/client";
+import { users } from "../database/schema/users";
+import { forbiddenResponse, unauthorizedResponse } from "../utils/response";
 import type { ApiHandler } from "./types";
 
 /**
- * Validates Bearer access JWT and attaches userId and role to request context.
- * Returns standardized 401 UNAUTHORIZED error envelope on failure.
+ * Validates Bearer access JWT, checks account active status in database,
+ * and attaches userId and role to request context.
+ * Returns standardized 401 UNAUTHORIZED or 403 FORBIDDEN on failure.
  */
 export function withAuth(handler: ApiHandler): ApiHandler {
   return async (request, context) => {
@@ -19,6 +23,27 @@ export function withAuth(handler: ApiHandler): ApiHandler {
 
     try {
       const payload = await verifyAccessToken(token);
+
+      // Deactivation check: verify is_active in database if DATABASE_URL is available
+      if (process.env.DATABASE_URL) {
+        try {
+          const db = getDb();
+          const userRecords = await db
+            .select({ isActive: users.isActive, role: users.role })
+            .from(users)
+            .where(eq(users.email, payload.sub))
+            .limit(1);
+
+          if (userRecords.length > 0 && !userRecords[0].isActive) {
+            return forbiddenResponse(
+              "Account has been deactivated. Contact an administrator.",
+            );
+          }
+        } catch {
+          // Fall through to token claims if DB check cannot be completed
+        }
+      }
+
       return handler(request, {
         ...context,
         userId: payload.sub,

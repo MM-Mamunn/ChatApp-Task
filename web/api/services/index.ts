@@ -1,1 +1,2 @@
-export { getHelloMessage, type HelloResult } from "./hello.service";
+export * from "./auth.service";
+export * from "./hello.service";
