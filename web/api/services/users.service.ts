@@ -157,22 +157,20 @@ export async function updateOwnProfile(
  * Admins receive full metadata.
  */
 export async function searchUsers(
-  searchTerm: string,
-  limit: number,
+  searchTerm?: string,
+  limit = 10,
   callerRole: "user" | "admin" = "user",
 ): Promise<UserSearchItem[]> {
   const db = getDb();
-  const trimmed = searchTerm.trim();
-  const pattern = `%${trimmed}%`;
+  const trimmed = (searchTerm || "").trim();
   const safeLimit = Math.min(Math.max(limit, 1), 20);
 
-  const searchCondition = or(
-    ilike(users.name, pattern),
-    ilike(users.email, pattern),
-  );
+  const searchCondition = trimmed
+    ? or(ilike(users.name, `%${trimmed}%`), ilike(users.email, `%${trimmed}%`))
+    : undefined;
 
   if (callerRole === "admin") {
-    const results = await db
+    const query = db
       .select({
         email: users.email,
         name: users.name,
@@ -182,9 +180,11 @@ export async function searchUsers(
         createdAt: users.createdAt,
         updatedAt: users.updatedAt,
       })
-      .from(users)
-      .where(searchCondition)
-      .limit(safeLimit);
+      .from(users);
+
+    const results = searchCondition
+      ? await query.where(searchCondition).limit(safeLimit)
+      : await query.limit(safeLimit);
 
     return results.map((u) => ({
       email: u.email,
@@ -198,6 +198,11 @@ export async function searchUsers(
   }
 
   // Non-admin callers: limited fields and active users only
+  const activeCondition = eq(users.isActive, true);
+  const whereClause = searchCondition
+    ? and(searchCondition, activeCondition)
+    : activeCondition;
+
   const results = await db
     .select({
       email: users.email,
@@ -205,7 +210,7 @@ export async function searchUsers(
       avatarUrl: users.avatarUrl,
     })
     .from(users)
-    .where(and(searchCondition, eq(users.isActive, true)))
+    .where(whereClause)
     .limit(safeLimit);
 
   return results.map((u) => ({

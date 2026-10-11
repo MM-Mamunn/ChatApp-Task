@@ -26,9 +26,11 @@ async function runRbacTests() {
   console.log("🧪 Starting Step 1.7 RBAC & Admin Oversight Tests...\n");
 
   const db = getDb();
-  const testUserEmail = `rbac_user_${Date.now()}@test.local`;
-  const testAdminEmail = `rbac_admin_${Date.now()}@test.local`;
-  const testTargetEmail = `rbac_target_${Date.now()}@test.local`;
+  const testRunId = Date.now();
+  const testUserEmail = `rbac_user_${testRunId}@test.local`;
+  const testAdminEmail = `rbac_admin_${testRunId}@test.local`;
+  const testTargetEmail = `rbac_target_${testRunId}@test.local`;
+  const testTargetName = `Target_${testRunId}`;
 
   // 1. Setup test users in database
   await db.insert(users).values([
@@ -46,7 +48,7 @@ async function runRbacTests() {
     },
     {
       email: testTargetEmail,
-      name: "Target Account",
+      name: testTargetName,
       role: "user",
       isActive: true,
     },
@@ -180,7 +182,7 @@ async function runRbacTests() {
 
   // 2.1 Normal user search -> limited fields (omits role, is_active)
   const userSearchReq = new Request(
-    `http://localhost:3000/api/users?query=Target&limit=5`,
+    `http://localhost:3000/api/users?query=${encodeURIComponent(testTargetName)}&limit=5`,
     {
       headers: { Authorization: `Bearer ${userToken}` },
     },
@@ -195,22 +197,24 @@ async function runRbacTests() {
       is_active?: boolean;
     }>;
   };
-  assert(userSearchJson.data.length > 0, "Should find target user");
-  assert.equal(userSearchJson.data[0].email, testTargetEmail);
+  const targetMatch = userSearchJson.data.find(
+    (u) => u.email === testTargetEmail,
+  );
+  assert(targetMatch, "Should find target user");
   assert.equal(
-    userSearchJson.data[0].role,
+    targetMatch.role,
     undefined,
     "Normal users must not see role in search results",
   );
   assert.equal(
-    userSearchJson.data[0].is_active,
+    targetMatch.is_active,
     undefined,
     "Normal users must not see is_active in search results",
   );
 
   // 2.2 Admin search -> full metadata (role, is_active included)
   const adminSearchReq = new Request(
-    `http://localhost:3000/api/users?query=Target&limit=5`,
+    `http://localhost:3000/api/users?query=${encodeURIComponent(testTargetName)}&limit=5`,
     {
       headers: { Authorization: `Bearer ${adminToken}` },
     },
@@ -220,8 +224,90 @@ async function runRbacTests() {
   const adminSearchJson = (await adminSearchRes.json()) as {
     data: Array<{ email: string; role?: string; is_active?: boolean }>;
   };
-  assert.equal(adminSearchJson.data[0].role, "user");
-  assert.equal(adminSearchJson.data[0].is_active, true);
+  const adminTargetMatch = adminSearchJson.data.find(
+    (u) => u.email === testTargetEmail,
+  );
+  assert(adminTargetMatch, "Admin search should find target user");
+  assert.equal(adminTargetMatch.role, "user");
+  assert.equal(adminTargetMatch.is_active, true);
+
+  // 2.3 Empty query search -> returns active users without error
+  const emptySearchReq = new Request(
+    `http://localhost:3000/api/users?limit=5`,
+    {
+      headers: { Authorization: `Bearer ${userToken}` },
+    },
+  );
+  const emptySearchRes = await authSearchUsers(emptySearchReq, {});
+  assert.equal(
+    emptySearchRes.status,
+    200,
+    "Empty query search must return 200",
+  );
+  const emptySearchJson = (await emptySearchRes.json()) as {
+    data: Array<{ email: string; name: string }>;
+  };
+  assert(
+    emptySearchJson.data.length > 0,
+    "Empty query should return available users",
+  );
+
+  // 2.4 Search using alias 'search' parameter -> returns matching users
+  const aliasSearchReq = new Request(
+    `http://localhost:3000/api/users?search=${encodeURIComponent(testTargetName)}&limit=5`,
+    {
+      headers: { Authorization: `Bearer ${userToken}` },
+    },
+  );
+  const aliasSearchRes = await authSearchUsers(aliasSearchReq, {});
+  assert.equal(
+    aliasSearchRes.status,
+    200,
+    "Alias search param must return 200",
+  );
+  const aliasSearchJson = (await aliasSearchRes.json()) as {
+    data: Array<{ email: string; name: string }>;
+  };
+  assert(
+    aliasSearchJson.data.length > 0,
+    "Should find matching user via search param",
+  );
+
+  // 2.5 Search by email substring
+  const emailSearchReq = new Request(
+    `http://localhost:3000/api/users?query=${encodeURIComponent(testTargetEmail)}&limit=5`,
+    {
+      headers: { Authorization: `Bearer ${userToken}` },
+    },
+  );
+  const emailSearchRes = await authSearchUsers(emailSearchReq, {});
+  assert.equal(emailSearchRes.status, 200);
+  const emailSearchJson = (await emailSearchRes.json()) as {
+    data: Array<{ email: string }>;
+  };
+  assert(
+    emailSearchJson.data.some((u) => u.email === testTargetEmail),
+    "Should find target user by email substring",
+  );
+
+  // 2.6 Search with no results -> returns empty array with 200
+  const noMatchReq = new Request(
+    `http://localhost:3000/api/users?query=nonexistent_xyz_9999&limit=5`,
+    {
+      headers: { Authorization: `Bearer ${userToken}` },
+    },
+  );
+  const noMatchRes = await authSearchUsers(noMatchReq, {});
+  assert.equal(noMatchRes.status, 200);
+  const noMatchJson = (await noMatchRes.json()) as {
+    data: Array<{ email: string }>;
+  };
+  assert.equal(
+    noMatchJson.data.length,
+    0,
+    "No results should return empty array",
+  );
+
   console.log("  ✓ User search and role-scoped field disclosure passed.");
 
   // --------------------------------------------------------------------------

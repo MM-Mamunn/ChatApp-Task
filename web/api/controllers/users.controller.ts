@@ -31,10 +31,16 @@ const updateProfileSchema = z
     message: "At least one field (name or avatar_url) must be provided",
   });
 
-const searchQuerySchema = z.object({
-  query: z.string().min(1, "Search query is required"),
-  limit: z.coerce.number().int().min(1).max(20).default(10),
-});
+const searchQuerySchema = z
+  .object({
+    query: z.string().optional(),
+    search: z.string().optional(),
+    limit: z.coerce.number().int().min(1).max(50).default(10),
+  })
+  .transform((data) => ({
+    query: (data.query !== undefined ? data.query : data.search || "").trim(),
+    limit: Math.min(Math.max(data.limit, 1), 20),
+  }));
 
 function handleControllerError(err: unknown): Response {
   if (err instanceof AppError) {
