@@ -16,8 +16,8 @@ description: >-
 
 ## Route Handlers & API Architecture
 
-- HTTP Endpoints: `web/app/api/**/route.ts` (Next.js App Router).
-- Endpoint modules delegate to `web/api/routes/` -> `web/api/controllers/` -> `web/api/services/`.
+- HTTP Endpoints: `web/app/api/**/route.ts` (Next.js App Router — serving as the single route layer).
+- Route handlers wrap middlewares (`withSecurity`, `withAuth`, `withRoles`) and delegate directly to `web/api/controllers/` -> `web/api/services/`.
 - Validate **body, query, and route params** with Zod (step 1.5+).
 - Return consistent JSON errors: 400 invalid input, 401 unauthenticated, 403 forbidden, 404 when appropriate.
 

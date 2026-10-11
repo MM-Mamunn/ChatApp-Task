@@ -4,7 +4,6 @@ export * from "./controllers";
 export * from "./database";
 export * from "./errors";
 export * from "./middlewares";
-export * from "./routes";
 export * from "./services";
 export * from "./utils";
 export * from "./validation";

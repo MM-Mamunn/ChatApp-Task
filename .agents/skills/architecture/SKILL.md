@@ -122,15 +122,17 @@ The repository root houses project specifications, implementation roadmaps, agen
 | `/03-submission-and-write-up/` | Plan for Part 3 end-to-end verification, documentation, and write-up. |
 | `/web/` | Root of the Next.js full-stack application and npm workspace cwd. |
 | `/web/app/` | Next.js App Router containing React page layouts and HTTP API route handlers. |
-| `/web/app/api/` | HTTP entry points (`route.ts`) delegating incoming requests to `web/api`. |
+| `/web/app/api/` | HTTP Route handlers (`route.ts`) serving as the route layer, applying middlewares and invoking controllers. |
 | `/web/api/` | Backend API architecture containing modular domain layers. |
 | `/web/api/authentication/` | JWT configuration and reusable token creation/verification logic. |
 | `/web/api/configuration/` | Centralized environment variable reading with explicit missing-variable errors. |
 | `/web/api/controllers/` | Request parsing, controller orchestration, and HTTP response assembly. |
 | `/web/api/database/` | Drizzle ORM singleton client, Drizzle Kit configuration, schemas, and migrations. |
-| `/web/api/middlewares/` | Reusable HTTP middlewares for JWT authentication (`withAuth`) and RBAC (`withRoles`). |
-| `/web/api/routes/` | Route handlers defining API endpoints and wiring middlewares to controllers. |
+| `/web/api/errors/` | Standard error codes, custom error hierarchy (`AppError`), and error formatting. |
+| `/web/api/middlewares/` | Reusable HTTP middlewares for security (`withSecurity`), JWT authentication (`withAuth`), and RBAC (`withRoles`). |
 | `/web/api/services/` | Pure business logic and database interactions independent of HTTP transport. |
+| `/web/api/utils/` | Shared utilities: standard response envelopes (`apiSuccess`, `apiError`) and safe request parsers. |
+| `/web/api/validation/` | Zod validation utilities for request bodies, query parameters, and route params. |
 | `/web/components/` | Reusable React UI components (Tailwind CSS + Framer Motion). |
 | `/web/lib/` | Cross-cutting client/server utilities and client environment helpers. |
 | `/web/public/` | Unprocessed static files served by Next.js directly. |
@@ -145,12 +147,9 @@ The application follows a clean, decoupled layered architecture inside Next.js:
 [ Browser / Client ]
          │  HTTP Request
          ▼
-[ Next.js App Router ]  ──>  web/app/api/**/route.ts
+[ Route Layer (Next.js App Router) ] ──>  web/app/api/**/route.ts
          │
-         ▼
-[ API Routes Layer ]    ──>  web/api/routes/*.ts
-         │
-         ├─── [ Middlewares Layer ]  ──>  web/api/middlewares/ (withAuth, withRoles)
+         ├─── [ Middlewares Layer ]  ──>  web/api/middlewares/ (withSecurity, withAuth, withRoles)
          │           │
          │           ▼
          │      [ Authentication ]   ──>  web/api/authentication/ (jose, JWT)
@@ -167,14 +166,10 @@ The application follows a clean, decoupled layered architecture inside Next.js:
 [ Supabase PostgreSQL ] ──>  Persistent storage
 ```
 
-### 1. HTTP Entry Points (`web/app/api/`)
-- Pure Next.js App Router handlers (`export async function GET/POST/PATCH/DELETE`).
-- Thin wrappers that delegate directly to route handlers in `web/api/routes/`.
-- Keeps Next.js routing conventions intact while keeping API business logic portable and testable.
-
-### 2. Routes (`web/api/routes/`)
-- Define endpoint behavior and wire controllers together with reusable middleware wrappers (e.g. `withAuth`, `withRoles`).
-- Keep route signatures clean and transport-independent.
+### 1. Route Handlers (`web/app/api/`)
+- Pure Next.js App Router handlers (`export const GET/POST/PATCH/DELETE`).
+- Serves as the single **Route Layer**: applies middleware wrappers (`withSecurity`, `withAuth`, `withRoles`) and delegates directly to controllers in `web/api/controllers/`.
+- Eliminates duplicate routing boilerplate while keeping business logic decoupled and testable.
 
 ### 3. Middlewares (`web/api/middlewares/`)
 - Request processing pipelines:
@@ -219,7 +214,5 @@ When adding new features (e.g. Conversations, Messages, Profiles):
 1. **Add Drizzle Schema:** Define tables in `web/api/database/schema/` and export from `web/api/database/schema/index.ts`.
 2. **Implement Service:** Add business logic and Drizzle queries in `web/api/services/<resource>.service.ts`.
 3. **Implement Controller:** Add HTTP request/response handler in `web/api/controllers/<resource>.controller.ts`.
-4. **Implement Route Handler:** Define route with middleware in `web/api/routes/<resource>.route.ts`.
-5. **Mount in App Router:** Create `web/app/api/<resource>/route.ts` exporting HTTP methods that delegate to `web/api/routes`.
-6. **Apply Middlewares:** Use `withAuth` and `withRoles` on routes that require authentication or specific roles.
-7. **Run Verification:** Run `npm run lint`, `npm run format:check`, and `npm run build` from `web/`.
+4. **Implement App Router Endpoint:** Create `web/app/api/<resource>/route.ts` wrapping controllers with required middlewares (`withSecurity`, `withAuth`, `withRoles`).
+5. **Run Verification:** Run `npm run lint`, `npm run format:check`, and `npm run build` from `web/`.
