@@ -9,12 +9,8 @@ function findEnvFile(): string | null {
   if (process.env.DATABASE_URL && process.env.JWT_ACCESS_SECRET) {
     return null;
   }
-  const candidates = [
-    process.cwd(),
-    path.resolve(process.cwd(), ".."),
-    path.resolve(__dirname, "../../.."),
-    path.resolve(__dirname, "../.."),
-  ];
+  const cwd = process.cwd();
+  const candidates = [cwd, path.join(cwd, "web")];
   for (const dir of candidates) {
     const envLocal = path.join(dir, ".env.local");
     if (fs.existsSync(envLocal)) return envLocal;

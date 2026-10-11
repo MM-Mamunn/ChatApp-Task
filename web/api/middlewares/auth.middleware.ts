@@ -24,7 +24,8 @@ export function withAuth(handler: ApiHandler): ApiHandler {
     try {
       const payload = await verifyAccessToken(token);
 
-      // Deactivation check: verify is_active in database if DATABASE_URL is available
+      let resolvedRole = payload.role;
+      // Deactivation and fresh role check: verify is_active in database if DATABASE_URL is available
       if (process.env.DATABASE_URL) {
         try {
           const db = getDb();
@@ -34,10 +35,13 @@ export function withAuth(handler: ApiHandler): ApiHandler {
             .where(eq(users.email, payload.sub))
             .limit(1);
 
-          if (userRecords.length > 0 && !userRecords[0].isActive) {
-            return forbiddenResponse(
-              "Account has been deactivated. Contact an administrator.",
-            );
+          if (userRecords.length > 0) {
+            if (!userRecords[0].isActive) {
+              return forbiddenResponse(
+                "Account has been deactivated. Contact an administrator.",
+              );
+            }
+            resolvedRole = userRecords[0].role as "user" | "admin";
           }
         } catch {
           // Fall through to token claims if DB check cannot be completed
@@ -47,7 +51,7 @@ export function withAuth(handler: ApiHandler): ApiHandler {
       return handler(request, {
         ...context,
         userId: payload.sub,
-        role: payload.role,
+        role: resolvedRole,
       });
     } catch {
       return unauthorizedResponse("Access token is invalid or expired");
