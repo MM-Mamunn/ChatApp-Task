@@ -12,7 +12,8 @@
     "db:generate": "drizzle-kit generate --config api/database/drizzle.config.ts",
     "db:migrate": "drizzle-kit migrate --config api/database/drizzle.config.ts",
     "db:studio": "drizzle-kit studio --config api/database/drizzle.config.ts",
-    "db:seed": "tsx api/database/seed.ts"
+    "db:seed": "tsx api/database/seed.ts",
+    "test:security": "tsx api/test/security-baseline.test.ts"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
@@ -22,7 +23,8 @@
     "next": "16.4.0",
     "postgres": "^3.4.9",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",

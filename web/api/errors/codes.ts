@@ -1,0 +1,16 @@
+/**
+ * Standard API error codes matching 01_api-and-chat/API.md Section 3.3.
+ */
+export const API_ERROR_CODES = {
+  BAD_REQUEST: "BAD_REQUEST",
+  VALIDATION_ERROR: "VALIDATION_ERROR",
+  UNAUTHORIZED: "UNAUTHORIZED",
+  FORBIDDEN: "FORBIDDEN",
+  NOT_FOUND: "NOT_FOUND",
+  CONFLICT: "CONFLICT",
+  RATE_LIMITED: "RATE_LIMITED",
+  INTERNAL_SERVER_ERROR: "INTERNAL_SERVER_ERROR",
+} as const;
+
+export type ApiErrorCode =
+  (typeof API_ERROR_CODES)[keyof typeof API_ERROR_CODES];
