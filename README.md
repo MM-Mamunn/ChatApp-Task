@@ -27,6 +27,7 @@ A production-minded, full-stack realtime chat application built with Next.js 16 
 - **Realtime Direct & Group Messaging**: 1-on-1 direct conversations (duplicate-safe initiation) and multi-member named group channels. Instant message delivery powered by Supabase Realtime over WebSockets—zero polling required.
 - **Responsive & Accessible UI**: Clean desktop and mobile responsive interface built with Tailwind CSS v4, Framer Motion animations, accessible keyboard navigation, visible focus indicators, and ARIA attributes across all modals and inputs.
 - **Admin Oversight Console**: Protected administrative dashboard (`/admin` and in-app modal) providing project-wide user management, role modification, account deactivation, cursor-paginated activity audit logs, and read-only inspection of conversations with full accountability logging.
+- **Creative Landing Page (Part 2)**: Responsive public showcase at `/` and `/landing` featuring the **Zeppelin Flight Deck** interactive protocol simulator, dual-role perspective switcher (Member vs Admin), live push vs polling telemetry comparator, layered architecture explorer, and 1-click evaluator test credentials copy hub.
 - **Hardened Security Baseline**: Security headers (`X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy`), explicit CORS origin allowlist, and server-side Zod validation on request bodies, query parameters, and route parameters.
 
 ---

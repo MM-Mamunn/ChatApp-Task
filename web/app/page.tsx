@@ -1,34 +1,57 @@
-"use client";
-
 import React from "react";
-import { useAuth } from "@/lib/auth-context";
-import { ChatShell } from "@/components/chat/chat-shell";
-import { AuthCard } from "@/components/auth/auth-card";
-import { Loader2Icon } from "@/components/ui/icons";
+import type { Metadata } from "next";
+import { LandingNavbar } from "@/components/landing/navbar";
+import { LandingHero } from "@/components/landing/hero";
+import { LandingExperience } from "@/components/landing/experience";
+import { LandingFeatures } from "@/components/landing/features";
+import { LandingBenefits } from "@/components/landing/benefits";
+import { LandingDemoAccounts } from "@/components/landing/demo-accounts";
+import { LandingCtaBanner } from "@/components/landing/cta-banner";
+import { LandingFooter } from "@/components/landing/footer";
 
-export default function Home() {
-  const { isAuthenticated, isLoading } = useAuth();
+export const metadata: Metadata = {
+  title: "ChatApp Zeppelin — Effortless Real-Time Team Messaging",
+  description:
+    "Team messaging as quiet and effortless as a zeppelin. Instant real-time channels, direct chats, and distraction-free collaboration for high-performing teams.",
+};
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
-        <div className="flex flex-col items-center gap-3">
-          <Loader2Icon className="w-8 h-8 text-indigo-600 animate-spin" />
-          <p className="text-xs text-slate-500 font-medium">
-            Loading chat application...
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  if (isAuthenticated) {
-    return <ChatShell />;
-  }
-
+export default function HomePage() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 px-4 py-12">
-      <AuthCard />
+    <div className="min-h-screen bg-slate-950 text-slate-100 antialiased selection:bg-sky-500 selection:text-white flex flex-col font-sans">
+      {/* Accessible skip link */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 z-[100] px-4 py-2 bg-sky-500 text-white rounded-xl shadow-lg focus:outline-none focus:ring-2 focus:ring-white text-xs font-semibold"
+      >
+        Skip to main content
+      </a>
+
+      {/* Navigation */}
+      <LandingNavbar />
+
+      {/* Main Content Sections */}
+      <main id="main-content" className="flex-1 flex flex-col">
+        {/* Hero Section with Live Mock UI */}
+        <LandingHero />
+
+        {/* Interactive Experience Sandbox (Bonus Feature) */}
+        <LandingExperience />
+
+        {/* Feature Superpowers */}
+        <LandingFeatures />
+
+        {/* Why ChatApp: Modern Contrast vs Legacy Messengers */}
+        <LandingBenefits />
+
+        {/* Ready-to-use Demo Personas */}
+        <LandingDemoAccounts />
+
+        {/* Closing Conversion CTA Banner */}
+        <LandingCtaBanner />
+      </main>
+
+      {/* Footer */}
+      <LandingFooter />
     </div>
   );
 }
