@@ -23,6 +23,10 @@ import { GroupMembersModal } from "./group-members-modal";
 
 interface ChatPaneProps {
   activeTarget: ActiveTarget;
+  userProfiles?: Record<
+    string,
+    { name?: string | null; avatarUrl?: string | null }
+  >;
   onBackToSidebar?: () => void;
   onMessageSentSuccess?: () => void;
   onGroupUpdated?: (groupId: string, newMemberCount: number) => void;
@@ -67,6 +71,7 @@ function formatDateDivider(dateString: string): string {
 
 export function ChatPane({
   activeTarget,
+  userProfiles,
   onBackToSidebar,
   onMessageSentSuccess,
   onGroupUpdated,
@@ -78,8 +83,48 @@ export function ChatPane({
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [isLoadingEarlier, setIsLoadingEarlier] = useState(false);
 
+  // Group members profile map (email -> { name, avatarUrl })
+  const [groupMembersMap, setGroupMembersMap] = useState<
+    Record<string, { name?: string | null; avatarUrl?: string | null }>
+  >({});
+
   // Group members modal state
   const [isGroupMembersOpen, setIsGroupMembersOpen] = useState(false);
+
+  // Load group members for member avatar and name resolution in group channels
+  useEffect(() => {
+    if (activeTarget?.type !== "group" || !activeTarget.groupId) {
+      return;
+    }
+
+    let isMounted = true;
+    apiClient
+      .getGroupMembers(activeTarget.groupId)
+      .then((res) => {
+        if (isMounted && res.success && res.data) {
+          const map: Record<
+            string,
+            { name?: string | null; avatarUrl?: string | null }
+          > = {};
+          res.data.forEach((m) => {
+            if (m.email) {
+              map[m.email.toLowerCase()] = {
+                name: m.name,
+                avatarUrl: m.avatar_url,
+              };
+            }
+          });
+          setGroupMembersMap(map);
+        }
+      })
+      .catch(() => {
+        // Fall back gracefully to initials on failure
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [activeTarget]);
 
   // Load error
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -492,27 +537,71 @@ export function ChatPane({
     }
   };
 
+  const getSenderProfile = useCallback(
+    (senderEmail: string) => {
+      const lower = senderEmail.toLowerCase();
+      if (
+        activeTarget?.type === "direct" &&
+        lower === activeTarget.recipientEmail.toLowerCase()
+      ) {
+        return {
+          name: activeTarget.recipientName || senderEmail.split("@")[0],
+          avatarUrl: activeTarget.avatarUrl || null,
+        };
+      }
+
+      if (groupMembersMap[lower]) {
+        return {
+          name: groupMembersMap[lower].name || senderEmail.split("@")[0],
+          avatarUrl: groupMembersMap[lower].avatarUrl || null,
+        };
+      }
+
+      if (userProfiles?.[lower]) {
+        return {
+          name: userProfiles[lower].name || senderEmail.split("@")[0],
+          avatarUrl: userProfiles[lower].avatarUrl || null,
+        };
+      }
+
+      if (currentUser && lower === currentUser.email.toLowerCase()) {
+        return {
+          name: currentUser.name || senderEmail.split("@")[0],
+          avatarUrl: currentUser.avatar_url || null,
+        };
+      }
+
+      return {
+        name: senderEmail.split("@")[0],
+        avatarUrl: null,
+      };
+    },
+    [activeTarget, groupMembersMap, userProfiles, currentUser],
+  );
+
   if (!activeTarget) {
     return (
-      <div className="flex-1 hidden md:flex flex-col items-center justify-center p-8 text-center bg-white dark:bg-slate-950">
-        <div className="w-16 h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/60 flex items-center justify-center text-indigo-600 dark:text-indigo-400 mb-4 shadow-sm">
-          <MessageSquareIcon className="w-8 h-8" />
+      <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-8 text-center bg-white dark:bg-slate-950 h-full min-h-0 w-full min-w-0 overflow-y-auto">
+        <div className="max-w-md w-full flex flex-col items-center justify-center px-4">
+          <div className="w-16 h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/60 flex items-center justify-center text-indigo-600 dark:text-indigo-400 mb-4 shadow-sm shrink-0">
+            <MessageSquareIcon className="w-8 h-8" />
+          </div>
+          <h2 className="text-base font-semibold text-slate-800 dark:text-slate-200">
+            Select a Conversation
+          </h2>
+          <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto leading-relaxed break-words">
+            Choose a conversation from the sidebar or start a new chat to begin
+            messaging with end-to-end authenticated security.
+          </p>
         </div>
-        <h2 className="text-base font-semibold text-slate-800 dark:text-slate-200">
-          Select a Conversation
-        </h2>
-        <p className="text-xs text-slate-500 max-w-sm mt-1">
-          Choose a conversation from the sidebar or start a new chat to begin
-          messaging with end-to-end authenticated security.
-        </p>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-white dark:bg-slate-950 min-w-0">
+    <div className="flex-1 flex flex-col h-full min-h-0 bg-white dark:bg-slate-950 min-w-0 overflow-hidden relative">
       {/* Chat Pane Header */}
-      <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/80 backdrop-blur-sm flex items-center justify-between shrink-0">
+      <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/80 backdrop-blur-sm flex items-center justify-between shrink-0 z-10">
         <div className="flex items-center gap-3 min-w-0">
           {/* Mobile Back Button */}
           {onBackToSidebar && (
@@ -581,7 +670,7 @@ export function ChatPane({
         role="log"
         aria-label="Conversation message history"
         onScroll={handleScroll}
-        className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 relative"
+        className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 sm:p-6 space-y-4 relative"
       >
         {/* Load earlier messages trigger */}
         {hasMore && (
@@ -638,6 +727,7 @@ export function ChatPane({
         ) : (
           messages.map((msg, index) => {
             const isSelf = msg.isSelf;
+            const senderProfile = getSenderProfile(msg.sender_email);
             const prevMsg = messages[index - 1];
             const showDateDivider =
               !prevMsg ||
@@ -663,7 +753,10 @@ export function ChatPane({
                   {!isSelf && (
                     <Avatar
                       email={msg.sender_email}
-                      name={msg.sender_email.split("@")[0]}
+                      name={
+                        senderProfile.name || msg.sender_email.split("@")[0]
+                      }
+                      avatarUrl={senderProfile.avatarUrl}
                       size="sm"
                       className="mt-1 shrink-0"
                     />
@@ -734,21 +827,21 @@ export function ChatPane({
       )}
 
       {/* Composer Input Area */}
-      <div className="p-3 sm:p-4 border-t border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-950/90 backdrop-blur-sm shrink-0">
+      <div className="p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:p-4 border-t border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-950/95 backdrop-blur-sm shrink-0 z-10">
         <form
           onSubmit={handleSendMessage}
           className="relative flex items-end gap-2"
         >
-          <div className="flex-1 relative">
+          <div className="flex-1 relative min-w-0">
             <textarea
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Write a message... (Press Enter to send, Shift+Enter for newline)"
+              placeholder="Write a message..."
               aria-label="Write a message"
               rows={1}
               maxLength={4000}
-              className="w-full resize-none px-4 py-2.5 text-sm rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white dark:focus:bg-slate-950 transition-all max-h-32 min-h-[44px]"
+              className="w-full resize-none px-4 py-2.5 text-base sm:text-sm rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white dark:focus:bg-slate-950 transition-all max-h-28 sm:max-h-32 min-h-[44px]"
             />
             {inputText.length > 3000 && (
               <span className="absolute right-3 bottom-2 text-[10px] text-slate-400">
@@ -780,7 +873,16 @@ export function ChatPane({
           groupId={activeTarget.groupId}
           groupName={activeTarget.groupName}
           creatorEmail={activeTarget.creatorEmail}
-          onMemberAdded={(newCount) => {
+          onMemberAdded={(newCount, newMember) => {
+            if (newMember?.email) {
+              setGroupMembersMap((prev) => ({
+                ...prev,
+                [newMember.email.toLowerCase()]: {
+                  name: newMember.name,
+                  avatarUrl: newMember.avatar_url,
+                },
+              }));
+            }
             onGroupUpdated?.(activeTarget.groupId, newCount);
           }}
         />

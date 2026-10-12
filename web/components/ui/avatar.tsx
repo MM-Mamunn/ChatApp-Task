@@ -1,4 +1,6 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 
 interface AvatarProps {
   name?: string;
@@ -50,6 +52,8 @@ export function Avatar({
   className = "",
   isGroup = false,
 }: AvatarProps) {
+  const [failedUrl, setFailedUrl] = useState<string | null>(null);
+
   const sizeClasses = {
     xs: "w-6 h-6 text-xs",
     sm: "w-8 h-8 text-xs font-medium",
@@ -62,7 +66,12 @@ export function Avatar({
   const color = colorPairs[getColorIndex(seed)];
   const initials = isGroup ? "#" : getInitials(name, email);
 
-  if (avatarUrl && !isGroup) {
+  const hasValidImage =
+    Boolean(avatarUrl && avatarUrl.trim()) &&
+    !isGroup &&
+    failedUrl !== avatarUrl;
+
+  if (hasValidImage && avatarUrl) {
     return (
       <div
         className={`relative inline-flex shrink-0 items-center justify-center rounded-full overflow-hidden bg-zinc-200 dark:bg-zinc-800 ${sizeClasses} ${className}`}
@@ -72,9 +81,9 @@ export function Avatar({
           src={avatarUrl}
           alt={name || email || "Avatar"}
           className="w-full h-full object-cover"
-          onError={(e) => {
-            // fallback if avatar fails to load
-            (e.target as HTMLElement).style.display = "none";
+          onError={() => {
+            // Gracefully fall back to initials avatar if image fails to load
+            setFailedUrl(avatarUrl);
           }}
         />
       </div>

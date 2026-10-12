@@ -102,7 +102,7 @@ export function Sidebar({
   });
 
   return (
-    <aside className="w-full md:w-80 lg:w-96 flex flex-col h-full bg-slate-50/70 dark:bg-slate-900/70 border-r border-slate-200 dark:border-slate-800 shrink-0 select-none">
+    <aside className="w-full md:w-80 lg:w-96 flex flex-col h-full min-h-0 bg-slate-50/70 dark:bg-slate-900/70 border-r border-slate-200 dark:border-slate-800 shrink-0 select-none overflow-hidden">
       {/* User profile & actions banner */}
       <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-white/60 dark:bg-slate-950/40 backdrop-blur-sm flex items-center justify-between">
         <button
@@ -279,7 +279,7 @@ export function Sidebar({
       </div>
 
       {/* Conversation list */}
-      <div className="flex-1 overflow-y-auto px-2 py-2 space-y-1">
+      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-2 py-2 space-y-1">
         {isLoading ? (
           <div className="p-8 text-center text-slate-400 flex flex-col items-center">
             <Loader2Icon className="w-5 h-5 text-indigo-500 animate-spin mb-2" />

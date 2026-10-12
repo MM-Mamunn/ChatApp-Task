@@ -18,7 +18,7 @@ export default function ChatPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
+      <div className="min-h-screen min-h-dvh flex items-center justify-center bg-slate-50 dark:bg-slate-950">
         <div className="flex flex-col items-center gap-3">
           <Loader2Icon className="w-8 h-8 text-indigo-600 animate-spin" />
           <p className="text-xs text-slate-500 font-medium">

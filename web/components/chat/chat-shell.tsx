@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  useMemo,
+} from "react";
 import { useAuth } from "@/lib/auth-context";
 import { getSupabaseClient } from "@/lib/supabase-client";
 import {
@@ -256,11 +262,36 @@ export function ChatShell() {
     );
   };
 
+  // Known users map derived from current user and direct conversations
+  const knownUsersMap = useMemo(() => {
+    const map: Record<
+      string,
+      { name?: string | null; avatarUrl?: string | null }
+    > = {};
+    if (user?.email) {
+      map[user.email.toLowerCase()] = {
+        name: user.name,
+        avatarUrl: user.avatar_url,
+      };
+    }
+    directList.forEach((c) => {
+      if (c.other_user?.email) {
+        map[c.other_user.email.toLowerCase()] = {
+          name: c.other_user.name,
+          avatarUrl: c.other_user.avatar_url,
+        };
+      }
+    });
+    return map;
+  }, [user, directList]);
+
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-slate-100 dark:bg-slate-950 font-sans">
+    <div className="flex h-screen h-dvh max-h-dvh w-full overflow-hidden bg-slate-100 dark:bg-slate-950 font-sans fixed inset-0 md:relative md:inset-auto">
       {/* Sidebar: Visible on desktop, or on mobile when no conversation is active */}
       <div
-        className={`h-full ${activeTarget ? "hidden md:flex" : "flex w-full"}`}
+        className={`h-full min-h-0 md:shrink-0 ${
+          activeTarget ? "hidden md:flex" : "flex w-full md:w-auto"
+        }`}
       >
         <Sidebar
           directList={directList}
@@ -279,12 +310,13 @@ export function ChatShell() {
 
       {/* Chat Pane: Visible on desktop, or on mobile when conversation is active */}
       <div
-        className={`h-full flex-1 min-w-0 ${
-          activeTarget ? "flex" : "hidden md:flex"
+        className={`h-full min-h-0 flex-1 min-w-0 ${
+          activeTarget ? "flex flex-col" : "hidden md:flex md:flex-col"
         }`}
       >
         <ChatPane
           activeTarget={activeTarget}
+          userProfiles={knownUsersMap}
           onBackToSidebar={() => handleSelectTarget(null)}
           onMessageSentSuccess={() => refreshConversations()}
           onGroupUpdated={handleGroupUpdated}
