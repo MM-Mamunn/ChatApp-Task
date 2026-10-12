@@ -10,9 +10,9 @@ import { LandingCtaBanner } from "@/components/landing/cta-banner";
 import { LandingFooter } from "@/components/landing/footer";
 
 export const metadata: Metadata = {
-  title: "ChatApp Zeppelin — Effortless Real-Time Team Messaging",
+  title: "ChatApp — Effortless Real-Time Team Messaging",
   description:
-    "Team messaging as quiet and effortless as a zeppelin. Instant real-time channels, direct chats, and distraction-free collaboration for high-performing teams.",
+    "Team messaging built for speed, clarity, and effortless flow. Instant real-time channels, direct chats, and distraction-free collaboration for high-performing teams.",
 };
 
 export default function HomePage() {

@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ChatApp Zeppelin — Secure Realtime Chat Application",
+  title: "ChatApp — Secure Realtime Chat Application",
   description:
     "Production-minded realtime messaging engineered with Supabase WebSockets, rotating JWT sessions, and accountable administrative oversight.",
 };

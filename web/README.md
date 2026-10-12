@@ -1,6 +1,6 @@
 # Secure Realtime Chat Web Application
 
-Runnable Next.js 16 application for the Secure Realtime Chat assignment. Complete project architecture, specifications, and deployment guides can be found in the [root README.md](../README.md).
+Runnable Next.js 16 application for the Secure Realtime Chat assignment. Complete project architecture, specifications, deployment guides, and Part 3 thought process write-up can be found in [root README.md](../README.md) and [THOUGHT_PROCESS.md](../THOUGHT_PROCESS.md).
 
 ## Quick Start
 

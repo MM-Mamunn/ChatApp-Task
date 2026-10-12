@@ -81,16 +81,16 @@ export function LandingHero() {
             <span className="text-sky-300 font-semibold">Zero distraction</span>
           </motion.div>
 
-          {/* Main Headline naturally containing 'zeppelin' */}
+          {/* Main Headline */}
           <motion.h1
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
             className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white leading-[1.08]"
           >
-            Team messaging as quiet and effortless as a{" "}
+            Team messaging built for speed, clarity, and{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-indigo-300 to-indigo-500">
-              zeppelin.
+              effortless flow.
             </span>
           </motion.h1>
 

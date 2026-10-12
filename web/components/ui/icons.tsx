@@ -622,32 +622,3 @@ export function ExternalLinkIcon({
     </svg>
   );
 }
-
-export function ZeppelinIcon({
-  className = "w-5 h-5",
-}: {
-  className?: string;
-}) {
-  return (
-    <svg
-      className={className}
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.8}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      viewBox="0 0 24 24"
-    >
-      {/* Aerodynamic hull */}
-      <path d="M2 12c0-3.5 4.5-6 10-6s10 2.5 10 6-4.5 6-10 6S2 15.5 2 12z" />
-      {/* Structural longitudinal rib */}
-      <path d="M2 12h20" opacity="0.6" />
-      {/* Vertical cross struts */}
-      <path d="M8 7v10M16 7v10" opacity="0.4" />
-      {/* Gondola cabin */}
-      <rect x="9" y="18" width="6" height="2.5" rx="1" />
-      {/* Tail fins */}
-      <path d="M2 9.5l-1.5-1M2 14.5l-1.5 1" />
-    </svg>
-  );
-}

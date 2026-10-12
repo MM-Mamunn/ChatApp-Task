@@ -16,7 +16,7 @@ export function LandingFooter() {
                 <MessageSquareIcon className="w-4 h-4" />
               </div>
               <span className="text-base font-bold text-white tracking-tight">
-                ChatApp Zeppelin
+                ChatApp
               </span>
             </div>
             <p className="text-slate-400 text-xs leading-relaxed max-w-sm">
@@ -117,7 +117,7 @@ export function LandingFooter() {
 
         <div className="pt-8 border-t border-slate-900 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-slate-500">
           <p>
-            &copy; 2026 ChatApp Zeppelin &bull; Designed for effortless team
+            &copy; 2026 ChatApp &bull; Designed for effortless team
             communication.
           </p>
           <p className="font-mono">
