@@ -513,6 +513,7 @@ export function ChatPane({
             <button
               type="button"
               onClick={onBackToSidebar}
+              aria-label="Back to conversations list"
               className="md:hidden p-1.5 -ml-1 rounded-xl text-slate-500 hover:text-slate-800 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
             >
               <ArrowLeftIcon className="w-5 h-5" />
@@ -556,6 +557,8 @@ export function ChatPane({
       {/* Message Thread Scroll Container */}
       <div
         ref={scrollContainerRef}
+        role="log"
+        aria-label="Conversation message history"
         onScroll={handleScroll}
         className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 relative"
       >
@@ -721,6 +724,7 @@ export function ChatPane({
               onChange={(e) => setInputText(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Write a message... (Press Enter to send, Shift+Enter for newline)"
+              aria-label="Write a message"
               rows={1}
               maxLength={4000}
               className="w-full resize-none px-4 py-2.5 text-sm rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white dark:focus:bg-slate-950 transition-all max-h-32 min-h-[44px]"

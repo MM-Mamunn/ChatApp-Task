@@ -192,6 +192,7 @@ export function ChatShell() {
       />
 
       <ProfileModal
+        key={`${user?.email}-${user?.avatar_url}-${isProfileOpen}`}
         isOpen={isProfileOpen}
         onClose={() => setIsProfileOpen(false)}
       />

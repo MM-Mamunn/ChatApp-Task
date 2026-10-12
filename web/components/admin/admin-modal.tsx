@@ -319,6 +319,18 @@ export function AdminModal({ isOpen, onClose }: AdminModalProps) {
     }
   };
 
+  // Escape key handler
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
+
   // Initial fetch on modal open or tab switch
   useEffect(() => {
     if (!isOpen) return;
@@ -386,6 +398,9 @@ export function AdminModal({ isOpen, onClose }: AdminModalProps) {
     <AnimatePresence>
       <div className="fixed inset-0 z-50 flex items-center justify-center p-3 md:p-6 bg-slate-950/70 backdrop-blur-md">
         <motion.div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="admin-dialog-title"
           initial={{ opacity: 0, scale: 0.96, y: 12 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.96, y: 12 }}
@@ -400,7 +415,10 @@ export function AdminModal({ isOpen, onClose }: AdminModalProps) {
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
+                  <h2
+                    id="admin-dialog-title"
+                    className="text-base font-bold text-slate-900 dark:text-slate-100"
+                  >
                     Admin Oversight Console
                   </h2>
                   <span className="px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded-md bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
@@ -419,15 +437,22 @@ export function AdminModal({ isOpen, onClose }: AdminModalProps) {
               onClick={onClose}
               className="p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
               title="Close Admin Console"
+              aria-label="Close Admin Console"
             >
               <XIcon className="w-5 h-5" />
             </button>
           </div>
 
           {/* Navigation Tabs Bar */}
-          <div className="px-6 pt-3 pb-2 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center gap-2 shrink-0">
+          <div
+            role="tablist"
+            aria-label="Admin console navigation"
+            className="px-6 pt-3 pb-2 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center gap-2 shrink-0"
+          >
             <button
               type="button"
+              role="tab"
+              aria-selected={activeTab === "users"}
               onClick={() => {
                 setActiveTab("users");
                 if (usersList.length === 0) fetchUsers();
@@ -453,6 +478,8 @@ export function AdminModal({ isOpen, onClose }: AdminModalProps) {
 
             <button
               type="button"
+              role="tab"
+              aria-selected={activeTab === "activity"}
               onClick={() => {
                 setActiveTab("activity");
                 if (activities.length === 0) fetchActivity(actionFilter);
@@ -469,6 +496,8 @@ export function AdminModal({ isOpen, onClose }: AdminModalProps) {
 
             <button
               type="button"
+              role="tab"
+              aria-selected={activeTab === "conversations"}
               onClick={() => {
                 setActiveTab("conversations");
                 if (!conversationsOverview) fetchConversations();

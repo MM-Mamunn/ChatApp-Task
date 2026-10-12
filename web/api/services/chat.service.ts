@@ -12,6 +12,7 @@ import {
 } from "../errors/app-error";
 
 export interface DirectConversationItem {
+  conversation_id?: string;
   other_user: {
     email: string;
     name: string | null;
@@ -138,7 +139,9 @@ export async function listDirectConversations(
   const results: DirectConversationItem[] = [];
   for (const { otherEmail, lastMessage } of conversationsMap.values()) {
     const profile = profileMap.get(otherEmail);
+    const sortedPair = [normalizedUser, otherEmail.toLowerCase()].sort();
     results.push({
+      conversation_id: `${sortedPair[0]}:${sortedPair[1]}`,
       other_user: {
         email: otherEmail,
         name: profile?.name ?? null,

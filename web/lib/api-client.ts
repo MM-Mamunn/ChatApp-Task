@@ -322,10 +322,23 @@ class ApiClient {
     return this.request<UserProfile>("/api/users/me");
   }
 
-  public async updateMe(payload: { name?: string; avatarUrl?: string }) {
+  public async updateMe(payload: {
+    name?: string;
+    avatar_url?: string | null;
+    avatarUrl?: string | null;
+  }) {
+    const avatar =
+      payload.avatar_url !== undefined ? payload.avatar_url : payload.avatarUrl;
+    const body: Record<string, unknown> = {};
+    if (payload.name !== undefined) body.name = payload.name;
+    if (avatar !== undefined) {
+      body.avatar_url = avatar;
+      body.avatarUrl = avatar;
+    }
+
     return this.request<UserProfile>("/api/users/me", {
       method: "PATCH",
-      body: JSON.stringify(payload),
+      body: JSON.stringify(body),
     });
   }
 

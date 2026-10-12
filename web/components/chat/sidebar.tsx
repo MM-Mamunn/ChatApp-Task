@@ -131,6 +131,7 @@ export function Sidebar({
               type="button"
               onClick={onOpenAdmin}
               title="Open Admin Oversight Console"
+              aria-label="Open Admin Oversight Console"
               className="p-2 rounded-xl text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 transition-colors cursor-pointer"
             >
               <ShieldIcon className="w-4 h-4" />
@@ -140,6 +141,7 @@ export function Sidebar({
             type="button"
             onClick={logout}
             title="Sign out"
+            aria-label="Sign out"
             className="p-2 rounded-xl text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer"
           >
             <LogOutIcon className="w-4 h-4" />
@@ -153,6 +155,7 @@ export function Sidebar({
           <button
             type="button"
             onClick={onOpenAdmin}
+            aria-label="Open Admin Console"
             className="w-full flex items-center justify-between py-2 px-3 rounded-xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent hover:from-amber-500/20 hover:to-amber-500/10 border border-amber-200/80 dark:border-amber-800/60 text-amber-800 dark:text-amber-300 text-xs font-semibold transition-all cursor-pointer shadow-xs"
           >
             <div className="flex items-center gap-2">
@@ -195,15 +198,22 @@ export function Sidebar({
             value={filterQuery}
             onChange={(e) => setFilterQuery(e.target.value)}
             placeholder="Search conversations..."
+            aria-label="Search conversations"
             className="w-full pl-9 pr-3 py-1.5 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all"
           />
         </div>
       </div>
 
       {/* Category Tabs */}
-      <div className="px-3 pb-2 flex gap-1 text-[11px] font-medium border-b border-slate-200/60 dark:border-slate-800/60">
+      <div
+        role="tablist"
+        aria-label="Conversation category filters"
+        className="px-3 pb-2 flex gap-1 text-[11px] font-medium border-b border-slate-200/60 dark:border-slate-800/60"
+      >
         <button
           type="button"
+          role="tab"
+          aria-selected={activeTab === "all"}
           onClick={() => setActiveTab("all")}
           className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${
             activeTab === "all"
@@ -215,6 +225,8 @@ export function Sidebar({
         </button>
         <button
           type="button"
+          role="tab"
+          aria-selected={activeTab === "direct"}
           onClick={() => setActiveTab("direct")}
           className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${
             activeTab === "direct"
@@ -226,6 +238,8 @@ export function Sidebar({
         </button>
         <button
           type="button"
+          role="tab"
+          aria-selected={activeTab === "groups"}
           onClick={() => setActiveTab("groups")}
           className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${
             activeTab === "groups"
@@ -254,15 +268,19 @@ export function Sidebar({
                     Direct Messages
                   </p>
                 )}
-                {filteredDirect.map((conv) => {
+                {filteredDirect.map((conv, index) => {
                   const isActive =
                     activeTarget?.type === "direct" &&
                     activeTarget.recipientEmail.toLowerCase() ===
                       conv.other_user.email.toLowerCase();
+                  const itemKey =
+                    conv.conversation_id ||
+                    conv.other_user.email ||
+                    `direct-${index}`;
 
                   return (
                     <button
-                      key={conv.conversation_id}
+                      key={itemKey}
                       type="button"
                       onClick={() =>
                         onSelectTarget({
@@ -313,8 +331,9 @@ export function Sidebar({
                     Group Channels
                   </p>
                 )}
-                {filteredGroups.map((group) => {
-                  const resolvedGroupId = group.group_id || group.id;
+                {filteredGroups.map((group, index) => {
+                  const resolvedGroupId =
+                    group.group_id || group.id || `group-${index}`;
                   const isActive =
                     activeTarget?.type === "group" &&
                     activeTarget.groupId === resolvedGroupId;

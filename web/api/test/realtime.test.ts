@@ -125,6 +125,7 @@ async function testRealtime() {
   }
 
   console.log("🎉 Supabase Realtime test PASSED!");
+  process.exit(0);
 }
 
 testRealtime().catch((err) => {

@@ -1,45 +1,57 @@
-# Secure Realtime Chat (Part 1)
+# Secure Realtime Chat Web Application
 
-Next.js application for the secure realtime chat assignment. Repository planning docs live in the parent directory; runnable code lives in this `web/` folder.
+Runnable Next.js 16 application for the Secure Realtime Chat assignment. Complete project architecture, specifications, and deployment guides can be found in the [root README.md](../README.md).
 
-## Prerequisites
+## Quick Start
 
-- Node.js 20+
-- npm
+### 1. Setup Environment
 
-## Environment variables
+```bash
+cp ../.env.example .env
+```
 
-1. Copy `.env.example` to `.env.local`.
-2. Fill in values as each feature is implemented. Step 1.1 does not require real secrets to run locally—the app starts with placeholder public defaults.
+Populate `.env` with your Supabase database URL, JWT secrets, and Supabase public client keys.
 
-Committed files must never contain secrets. `.env.local` and other env files are gitignored; `.env.example` holds placeholders only.
-
-## Local development
-
-From this directory:
+### 2. Install & Migrate Database
 
 ```bash
 npm install
+npm run db:migrate
+npm run db:seed
+```
+
+### 3. Run Development Server
+
+```bash
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
 
-## Verification (Step 1.1)
+## Available Scripts
 
-Run these checks before marking the foundation step complete:
+| Command                 | Description                                                           |
+| ----------------------- | --------------------------------------------------------------------- |
+| `npm run dev`           | Starts Next.js development server with Turbopack                      |
+| `npm run build`         | Compiles production build                                             |
+| `npm run start`         | Starts Next.js production server                                      |
+| `npm run lint`          | Runs ESLint analysis                                                  |
+| `npm run format:check`  | Verifies Prettier code style                                          |
+| `npm run format`        | Automatically formats files using Prettier                            |
+| `npm run test:all`      | Runs all automated test suites (security, auth, rbac, chat, realtime) |
+| `npm run test:security` | Tests Zod validations, error envelopes, and CORS baseline             |
+| `npm run test:auth`     | Tests bcrypt hashing, JWT access tokens, and refresh token rotation   |
+| `npm run test:rbac`     | Tests role-based authorization matrix and admin oversight             |
+| `npm run test:chat`     | Tests direct and group chat endpoints and message pagination          |
+| `npm run test:realtime` | Tests Supabase Realtime WebSocket message push delivery               |
+| `npm run db:generate`   | Generates Drizzle Kit schema migrations                               |
+| `npm run db:migrate`    | Applies migrations to PostgreSQL database                             |
+| `npm run db:seed`       | Seeds test accounts and initial data                                  |
 
-```bash
-npm run lint
-npm run format:check
-npm run build
-```
+## Test Accounts
 
-Expected: all commands exit successfully; the dev server starts without requiring populated secrets in `.env.local`.
+Seed accounts available on login (or via 1-click quick-fill buttons):
 
-## Stack
-
-- Next.js (App Router) + TypeScript
-- Tailwind CSS
-- Framer Motion
-- ESLint + Prettier
+- **Admin**: `admin@example.com` / `AdminSecret123!`
+- **Alex (User)**: `alex@example.com` / `SecurePassword123!`
+- **Sam (User)**: `sam@example.com` / `SecurePassword123!`

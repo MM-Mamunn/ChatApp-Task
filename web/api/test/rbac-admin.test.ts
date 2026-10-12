@@ -127,7 +127,7 @@ async function runRbacTests() {
   assert.equal(ownJson.data.email, testUserEmail);
   assert.equal(ownJson.data.role, "user");
 
-  // 1.3 Update profile with valid payload -> 200
+  // 1.3 Update profile with valid payload (avatar_url) -> 200 & verify DB persistence
   const updateReq = new Request("http://localhost:3000/api/users/me", {
     method: "PATCH",
     headers: {
@@ -146,6 +146,120 @@ async function runRbacTests() {
   };
   assert.equal(updateJson.data.name, "Updated RBAC User");
   assert.equal(updateJson.data.avatar_url, "https://example.com/avatar.png");
+
+  // Verify direct database persistence
+  const dbCheck1 = await db
+    .select({ avatarUrl: users.avatarUrl, name: users.name })
+    .from(users)
+    .where(eq(users.email, testUserEmail))
+    .limit(1);
+  assert.equal(dbCheck1[0].avatarUrl, "https://example.com/avatar.png");
+
+  // 1.3.1 Update profile with camelCase avatarUrl (from frontend) -> 200 & verify DB persistence
+  const updateCamelReq = new Request("http://localhost:3000/api/users/me", {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${userToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      name: "Updated RBAC User",
+      avatarUrl: "https://api.dicebear.com/10.x/critters/svg?seed=Felix",
+    }),
+  });
+  const updateCamelRes = await authUpdateProfile(updateCamelReq, {});
+  assert.equal(
+    updateCamelRes.status,
+    200,
+    "CamelCase avatarUrl update must return 200",
+  );
+  const updateCamelJson = (await updateCamelRes.json()) as {
+    data: { avatar_url: string };
+  };
+  assert.equal(
+    updateCamelJson.data.avatar_url,
+    "https://api.dicebear.com/10.x/critters/svg?seed=Felix",
+  );
+
+  const dbCheckCamel = await db
+    .select({ avatarUrl: users.avatarUrl })
+    .from(users)
+    .where(eq(users.email, testUserEmail))
+    .limit(1);
+  assert.equal(
+    dbCheckCamel[0].avatarUrl,
+    "https://api.dicebear.com/10.x/critters/svg?seed=Felix",
+    "Database must persist the avatarUrl submitted via camelCase",
+  );
+
+  // 1.3.2 Clear avatar URL with empty string -> 200 & verify DB is NULL
+  const clearAvatarReq = new Request("http://localhost:3000/api/users/me", {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${userToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      avatarUrl: "",
+    }),
+  });
+  const clearAvatarRes = await authUpdateProfile(clearAvatarReq, {});
+  assert.equal(clearAvatarRes.status, 200, "Clearing avatar must return 200");
+  const clearAvatarJson = (await clearAvatarRes.json()) as {
+    data: { avatar_url: string | null };
+  };
+  assert.equal(clearAvatarJson.data.avatar_url, null);
+
+  const dbCheckCleared = await db
+    .select({ avatarUrl: users.avatarUrl })
+    .from(users)
+    .where(eq(users.email, testUserEmail))
+    .limit(1);
+  assert.equal(
+    dbCheckCleared[0].avatarUrl,
+    null,
+    "Database avatarUrl must be cleared to null",
+  );
+
+  // 1.3.3 Invalid avatar URL -> 400 VALIDATION_ERROR
+  const badUrlReq = new Request("http://localhost:3000/api/users/me", {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${userToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      avatarUrl: "invalid-not-a-url",
+    }),
+  });
+  const badUrlRes = await authUpdateProfile(badUrlReq, {});
+  assert.equal(badUrlRes.status, 400, "Invalid avatar URL must return 400");
+
+  // 1.3.4 User manipulation check: passing someone else's email in body does not affect that user
+  const tamperReq = new Request("http://localhost:3000/api/users/me", {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${userToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      email: testTargetEmail,
+      avatarUrl: "https://example.com/hacked.png",
+    }),
+  });
+  const tamperRes = await authUpdateProfile(tamperReq, {});
+  assert.equal(tamperRes.status, 200);
+
+  const targetDbCheck = await db
+    .select({ avatarUrl: users.avatarUrl })
+    .from(users)
+    .where(eq(users.email, testTargetEmail))
+    .limit(1);
+  assert.notEqual(
+    targetDbCheck[0].avatarUrl,
+    "https://example.com/hacked.png",
+    "Cannot modify another user's avatar URL",
+  );
 
   // 1.4 No self-promotion: sending extra fields like role is stripped by Zod
   const selfPromoReq = new Request("http://localhost:3000/api/users/me", {
@@ -172,7 +286,7 @@ async function runRbacTests() {
     "Self-promotion must be completely prevented",
   );
   console.log(
-    "  ✓ Profile retrieval, update, and no-self-promotion guard passed.",
+    "  ✓ Profile retrieval, avatar persistence, and security guards passed.",
   );
 
   // --------------------------------------------------------------------------

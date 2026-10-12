@@ -2,8 +2,11 @@ import path from "node:path";
 import { loadEnvConfig } from "@next/env";
 import type { NextConfig } from "next";
 
-const repoRoot = path.join(__dirname, "..");
-loadEnvConfig(repoRoot);
+const isVercel = Boolean(process.env.VERCEL);
+const repoRoot = isVercel ? __dirname : path.join(__dirname, "..");
+if (!isVercel) {
+  loadEnvConfig(repoRoot);
+}
 
 const nextConfig: NextConfig = {
   cacheComponents: true,

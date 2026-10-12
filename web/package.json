@@ -17,7 +17,9 @@
     "test:auth": "tsx api/test/auth.test.ts",
     "test:rbac": "tsx api/test/rbac-admin.test.ts",
     "test:chat": "tsx api/test/chat.test.ts",
-    "test:realtime": "tsx api/test/realtime.test.ts"
+    "test:realtime": "tsx api/test/realtime.test.ts",
+    "test": "tsx api/test/security-baseline.test.ts && tsx api/test/auth.test.ts && tsx api/test/rbac-admin.test.ts && tsx api/test/chat.test.ts",
+    "test:all": "tsx api/test/security-baseline.test.ts && tsx api/test/auth.test.ts && tsx api/test/rbac-admin.test.ts && tsx api/test/chat.test.ts && tsx api/test/realtime.test.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.3",

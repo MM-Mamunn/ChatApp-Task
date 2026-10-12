@@ -18,14 +18,39 @@ const updateProfileSchema = z
   .object({
     name: z
       .string()
+      .trim()
       .min(1, "Name cannot be empty")
       .max(128, "Name must not exceed 128 characters")
       .optional(),
     avatar_url: z
-      .string()
-      .url("avatar_url must be a valid URL")
-      .nullable()
+      .union([
+        z.string().trim().url("avatar_url must be a valid URL"),
+        z.literal(""),
+        z.null(),
+      ])
       .optional(),
+    avatarUrl: z
+      .union([
+        z.string().trim().url("avatarUrl must be a valid URL"),
+        z.literal(""),
+        z.null(),
+      ])
+      .optional(),
+  })
+  .transform((data) => {
+    const rawAvatar =
+      data.avatar_url !== undefined ? data.avatar_url : data.avatarUrl;
+    const finalAvatar =
+      rawAvatar === "" || rawAvatar === null
+        ? null
+        : rawAvatar === undefined
+          ? undefined
+          : rawAvatar;
+
+    return {
+      name: data.name,
+      avatar_url: finalAvatar,
+    };
   })
   .refine((data) => data.name !== undefined || data.avatar_url !== undefined, {
     message: "At least one field (name or avatar_url) must be provided",

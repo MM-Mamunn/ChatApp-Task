@@ -26,8 +26,9 @@ interface AuthContextType {
   logout: () => Promise<void>;
   updateProfile: (payload: {
     name?: string;
-    avatarUrl?: string;
-  }) => Promise<{ success: boolean; error?: string }>;
+    avatarUrl?: string | null;
+    avatar_url?: string | null;
+  }) => Promise<{ success: boolean; data?: UserProfile; error?: string }>;
   refreshUser: () => Promise<void>;
 }
 
@@ -147,12 +148,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const updateProfile = useCallback(
-    async (payload: { name?: string; avatarUrl?: string }) => {
+    async (payload: {
+      name?: string;
+      avatarUrl?: string | null;
+      avatar_url?: string | null;
+    }) => {
       try {
         const res = await apiClient.updateMe(payload);
         if (res.success && res.data) {
           setUser(res.data);
-          return { success: true };
+          return { success: true, data: res.data };
         }
         return {
           success: false,

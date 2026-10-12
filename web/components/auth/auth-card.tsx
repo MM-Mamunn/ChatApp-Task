@@ -102,14 +102,20 @@ export function AuthCard({ onSuccess }: AuthCardProps) {
         </div>
 
         {/* Mode switch tabs */}
-        <div className="grid grid-cols-2 p-1 mb-6 bg-slate-100 dark:bg-slate-800/80 rounded-xl text-sm font-medium">
+        <div
+          role="tablist"
+          aria-label="Authentication mode"
+          className="grid grid-cols-2 p-1 mb-6 bg-slate-100 dark:bg-slate-800/80 rounded-xl text-sm font-medium"
+        >
           <button
             type="button"
+            role="tab"
+            aria-selected={mode === "login"}
             onClick={() => {
               setMode("login");
               setErrorMessage(null);
             }}
-            className={`py-2 px-3 rounded-lg transition-all ${
+            className={`py-2 px-3 rounded-lg transition-all cursor-pointer ${
               mode === "login"
                 ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-sm"
                 : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
@@ -119,11 +125,13 @@ export function AuthCard({ onSuccess }: AuthCardProps) {
           </button>
           <button
             type="button"
+            role="tab"
+            aria-selected={mode === "register"}
             onClick={() => {
               setMode("register");
               setErrorMessage(null);
             }}
-            className={`py-2 px-3 rounded-lg transition-all ${
+            className={`py-2 px-3 rounded-lg transition-all cursor-pointer ${
               mode === "register"
                 ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-sm"
                 : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
@@ -256,6 +264,7 @@ export function AuthCard({ onSuccess }: AuthCardProps) {
           <div className="grid grid-cols-3 gap-2">
             <button
               type="button"
+              aria-label="Quick-fill Alex test account (user role)"
               onClick={() =>
                 fillQuickAccount(
                   "alex@example.com",
@@ -263,7 +272,7 @@ export function AuthCard({ onSuccess }: AuthCardProps) {
                   "Alex",
                 )
               }
-              className="flex flex-col items-center justify-center p-2 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-indigo-400 dark:hover:border-indigo-500 bg-slate-50 dark:bg-slate-800/60 hover:bg-indigo-50/50 dark:hover:bg-indigo-950/30 text-left transition-all group"
+              className="flex flex-col items-center justify-center p-2 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-indigo-400 dark:hover:border-indigo-500 bg-slate-50 dark:bg-slate-800/60 hover:bg-indigo-50/50 dark:hover:bg-indigo-950/30 text-left transition-all group cursor-pointer"
             >
               <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
                 <UserIcon className="w-3.5 h-3.5" />
@@ -274,10 +283,11 @@ export function AuthCard({ onSuccess }: AuthCardProps) {
 
             <button
               type="button"
+              aria-label="Quick-fill Sam test account (user role)"
               onClick={() =>
                 fillQuickAccount("sam@example.com", "SecurePassword123!", "Sam")
               }
-              className="flex flex-col items-center justify-center p-2 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-indigo-400 dark:hover:border-indigo-500 bg-slate-50 dark:bg-slate-800/60 hover:bg-indigo-50/50 dark:hover:bg-indigo-950/30 text-left transition-all group"
+              className="flex flex-col items-center justify-center p-2 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-indigo-400 dark:hover:border-indigo-500 bg-slate-50 dark:bg-slate-800/60 hover:bg-indigo-50/50 dark:hover:bg-indigo-950/30 text-left transition-all group cursor-pointer"
             >
               <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
                 <UserIcon className="w-3.5 h-3.5" />
@@ -288,6 +298,7 @@ export function AuthCard({ onSuccess }: AuthCardProps) {
 
             <button
               type="button"
+              aria-label="Quick-fill Admin test account (admin role)"
               onClick={() =>
                 fillQuickAccount(
                   "admin@example.com",
@@ -295,7 +306,7 @@ export function AuthCard({ onSuccess }: AuthCardProps) {
                   "Admin",
                 )
               }
-              className="flex flex-col items-center justify-center p-2 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-amber-400 dark:hover:border-amber-500 bg-slate-50 dark:bg-slate-800/60 hover:bg-amber-50/50 dark:hover:bg-amber-950/30 text-left transition-all group"
+              className="flex flex-col items-center justify-center p-2 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-amber-400 dark:hover:border-amber-500 bg-slate-50 dark:bg-slate-800/60 hover:bg-amber-50/50 dark:hover:bg-amber-950/30 text-left transition-all group cursor-pointer"
             >
               <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-800 dark:text-slate-200 group-hover:text-amber-600 dark:group-hover:text-amber-400">
                 <ShieldIcon className="w-3.5 h-3.5 text-amber-500" />
