@@ -2,8 +2,10 @@ import { z } from "zod";
 import { AppError } from "../errors/app-error";
 import type { ApiContext } from "../middlewares/types";
 import {
+  addGroupMember,
   createGroup,
   getDirectMessages,
+  getGroupMembers,
   getGroupMessages,
   listDirectConversations,
   listUserGroups,
@@ -61,6 +63,18 @@ const sendGroupMessageSchema = z.object({
       message: "Message cannot be empty or whitespace only",
     }),
 });
+
+const addGroupMemberSchema = z
+  .object({
+    user_email: z.string().email("Invalid email address").optional(),
+    email: z.string().email("Invalid email address").optional(),
+  })
+  .transform((data) => ({
+    user_email: (data.user_email || data.email || "").toLowerCase().trim(),
+  }))
+  .refine((data) => data.user_email.length > 0, {
+    message: "user_email is required",
+  });
 
 function handleControllerError(err: unknown): Response {
   if (err instanceof AppError) {
@@ -344,6 +358,89 @@ export async function sendGroupMessageController(
       validation.data.message,
     );
     return apiSuccess(newMessage, { status: 201 });
+  } catch (err) {
+    return handleControllerError(err);
+  }
+}
+
+/**
+ * GET /api/groups/[groupId]/members
+ * Lists all members of a group channel.
+ */
+export async function getGroupMembersController(
+  _request: Request,
+  context: ApiContext,
+): Promise<Response> {
+  if (!context.userId) {
+    return unauthorizedResponse();
+  }
+
+  const resolved = await resolveParams(context);
+  const groupId =
+    typeof resolved.groupId === "string" ? resolved.groupId.trim() : "";
+  if (!groupId) {
+    return apiError("VALIDATION_ERROR", "groupId is required", 400);
+  }
+
+  const UUID_REGEX =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!UUID_REGEX.test(groupId)) {
+    return apiError("VALIDATION_ERROR", "Invalid groupId format", 400, [
+      { field: "groupId", issue: "Must be a valid UUID" },
+    ]);
+  }
+
+  try {
+    const members = await getGroupMembers(
+      context.userId,
+      context.role || "user",
+      groupId,
+    );
+    return apiSuccess(members);
+  } catch (err) {
+    return handleControllerError(err);
+  }
+}
+
+/**
+ * POST /api/groups/[groupId]/members
+ * Adds a new member to an existing group. Only group creator can add.
+ */
+export async function addGroupMemberController(
+  request: Request,
+  context: ApiContext,
+): Promise<Response> {
+  if (!context.userId) {
+    return unauthorizedResponse();
+  }
+
+  const resolved = await resolveParams(context);
+  const groupId =
+    typeof resolved.groupId === "string" ? resolved.groupId.trim() : "";
+  if (!groupId) {
+    return apiError("VALIDATION_ERROR", "groupId is required", 400);
+  }
+
+  const UUID_REGEX =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!UUID_REGEX.test(groupId)) {
+    return apiError("VALIDATION_ERROR", "Invalid groupId format", 400, [
+      { field: "groupId", issue: "Must be a valid UUID" },
+    ]);
+  }
+
+  const validation = await validateBody(request, addGroupMemberSchema);
+  if (!validation.success) {
+    return validation.response;
+  }
+
+  try {
+    const result = await addGroupMember(
+      context.userId,
+      groupId,
+      validation.data.user_email,
+    );
+    return apiSuccess(result, { status: 201 });
   } catch (err) {
     return handleControllerError(err);
   }

@@ -163,7 +163,7 @@ export async function searchUsers(
 ): Promise<UserSearchItem[]> {
   const db = getDb();
   const trimmed = (searchTerm || "").trim();
-  const safeLimit = Math.min(Math.max(limit, 1), 20);
+  const safeLimit = Math.min(Math.max(limit, 1), 50);
 
   const searchCondition = trimmed
     ? or(ilike(users.name, `%${trimmed}%`), ilike(users.email, `%${trimmed}%`))

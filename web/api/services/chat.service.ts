@@ -6,6 +6,7 @@ import { directMessages, groupChatMessages } from "../database/schema/messages";
 import { users } from "../database/schema/users";
 import {
   BadRequestError,
+  ConflictError,
   ForbiddenError,
   NotFoundError,
   ValidationError,
@@ -678,5 +679,214 @@ export async function sendGroupMessage(
     sender_email: inserted.senderEmail,
     message: inserted.message,
     created_at: inserted.createdAt,
+  };
+}
+
+export interface GroupMemberResponse {
+  email: string;
+  name: string | null;
+  avatar_url: string | null;
+  joined_at: Date;
+  is_creator: boolean;
+}
+
+export interface AddGroupMemberResponse {
+  group_id: string;
+  user_email: string;
+  name: string | null;
+  avatar_url: string | null;
+  joined_at: Date;
+  member_count: number;
+}
+
+/**
+ * Retrieves members of a group channel.
+ * Caller must be a member of the group, or an admin.
+ */
+export async function getGroupMembers(
+  currentUserEmail: string,
+  callerRole: string,
+  groupId: string,
+): Promise<GroupMemberResponse[]> {
+  const db = getDb();
+  const normalizedUser = currentUserEmail.toLowerCase().trim();
+
+  // 1. Verify group exists
+  const groupRows = await db
+    .select({
+      groupId: groups.groupId,
+      creatorEmail: groups.creatorEmail,
+    })
+    .from(groups)
+    .where(eq(groups.groupId, groupId))
+    .limit(1);
+
+  if (groupRows.length === 0) {
+    throw new NotFoundError("Group does not exist");
+  }
+
+  const group = groupRows[0];
+
+  // 2. Membership check (unless admin)
+  if (callerRole !== "admin") {
+    const membership = await db
+      .select({ userEmail: groupMembers.userEmail })
+      .from(groupMembers)
+      .where(
+        and(
+          eq(groupMembers.groupId, groupId),
+          eq(groupMembers.userEmail, normalizedUser),
+        ),
+      )
+      .limit(1);
+
+    if (membership.length === 0) {
+      throw new ForbiddenError("You are not a member of this group");
+    }
+  }
+
+  // 3. Query group members joined with users table
+  const members = await db
+    .select({
+      email: groupMembers.userEmail,
+      joinedAt: groupMembers.joinedAt,
+      name: users.name,
+      avatarUrl: users.avatarUrl,
+    })
+    .from(groupMembers)
+    .innerJoin(users, eq(groupMembers.userEmail, users.email))
+    .where(eq(groupMembers.groupId, groupId))
+    .orderBy(
+      desc(
+        sql`CASE WHEN LOWER(${groupMembers.userEmail}) = LOWER(${group.creatorEmail}) THEN 1 ELSE 0 END`,
+      ),
+      groupMembers.joinedAt,
+    );
+
+  return members.map((m) => ({
+    email: m.email,
+    name: m.name ?? null,
+    avatar_url: m.avatarUrl ?? null,
+    joined_at: m.joinedAt,
+    is_creator: m.email.toLowerCase() === group.creatorEmail.toLowerCase(),
+  }));
+}
+
+/**
+ * Adds a new member to an existing group.
+ * Only the group creator can add members (verified strictly on backend: loggedInUser.email === group.creator_email).
+ */
+export async function addGroupMember(
+  currentUserEmail: string,
+  groupId: string,
+  targetUserEmail: string,
+): Promise<AddGroupMemberResponse> {
+  const db = getDb();
+  const normalizedCreator = currentUserEmail.toLowerCase().trim();
+  const normalizedTarget = targetUserEmail.toLowerCase().trim();
+
+  if (!normalizedTarget || !normalizedTarget.includes("@")) {
+    throw new ValidationError(
+      [{ field: "user_email", issue: "Must be a valid email address" }],
+      "Invalid user email",
+    );
+  }
+
+  // 1. Verify group exists
+  const groupRows = await db
+    .select({
+      groupId: groups.groupId,
+      name: groups.name,
+      creatorEmail: groups.creatorEmail,
+    })
+    .from(groups)
+    .where(eq(groups.groupId, groupId))
+    .limit(1);
+
+  if (groupRows.length === 0) {
+    throw new NotFoundError("Group does not exist");
+  }
+
+  const group = groupRows[0];
+
+  // 2. Creator-only authorization check
+  if (normalizedCreator !== group.creatorEmail.toLowerCase()) {
+    throw new ForbiddenError("Only the group creator can add members");
+  }
+
+  // 3. Verify target user exists in users table
+  const targetUserRows = await db
+    .select({
+      email: users.email,
+      name: users.name,
+      avatarUrl: users.avatarUrl,
+      isActive: users.isActive,
+    })
+    .from(users)
+    .where(eq(users.email, normalizedTarget))
+    .limit(1);
+
+  if (targetUserRows.length === 0) {
+    throw new NotFoundError("User does not exist");
+  }
+
+  const targetUser = targetUserRows[0];
+  if (!targetUser.isActive) {
+    throw new BadRequestError("Cannot add a deactivated user to a group");
+  }
+
+  // 4. Verify target user is not already a member
+  const existingMembership = await db
+    .select({ userEmail: groupMembers.userEmail })
+    .from(groupMembers)
+    .where(
+      and(
+        eq(groupMembers.groupId, groupId),
+        eq(groupMembers.userEmail, normalizedTarget),
+      ),
+    )
+    .limit(1);
+
+  if (existingMembership.length > 0) {
+    throw new ConflictError("User is already a member of this group");
+  }
+
+  // 5. Insert new member into group_members
+  const [newMember] = await db
+    .insert(groupMembers)
+    .values({
+      groupId,
+      userEmail: normalizedTarget,
+    })
+    .returning();
+
+  // 6. Fetch updated member count
+  const countResult = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(groupMembers)
+    .where(eq(groupMembers.groupId, groupId));
+
+  const newMemberCount = countResult[0]?.count ?? 1;
+
+  // 7. Log activity
+  await db.insert(activityLogs).values({
+    actorEmail: normalizedCreator,
+    action: "GROUP_ADD_MEMBER",
+    targetType: "group",
+    targetId: groupId,
+    details: {
+      group_name: group.name,
+      added_user_email: normalizedTarget,
+      member_count: newMemberCount,
+    },
+  });
+
+  return {
+    group_id: groupId,
+    user_email: normalizedTarget,
+    name: targetUser.name ?? null,
+    avatar_url: targetUser.avatarUrl ?? null,
+    joined_at: newMember.joinedAt,
+    member_count: newMemberCount,
   };
 }

@@ -26,6 +26,7 @@ export type ActiveTarget =
       groupId: string;
       groupName: string;
       memberCount: number;
+      creatorEmail?: string;
     }
   | null;
 
@@ -348,6 +349,7 @@ export function Sidebar({
                           groupId: resolvedGroupId,
                           groupName: group.name,
                           memberCount: group.member_count,
+                          creatorEmail: group.creator_email || group.created_by,
                         })
                       }
                       className={`w-full flex items-center gap-3 p-2.5 rounded-xl text-left transition-all cursor-pointer ${

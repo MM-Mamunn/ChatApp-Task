@@ -31,6 +31,8 @@ Complete reference manual for all APIs implemented in the Chat Application acros
    - [POST /api/groups](#82-post-apigroups)
    - [GET /api/groups/:groupId/messages](#83-get-apigroupsgroupidmessages)
    - [POST /api/groups/:groupId/messages](#84-post-apigroupsgroupidmessages)
+   - [GET /api/groups/:groupId/members](#85-get-apigroupsgroupidmembers)
+   - [POST /api/groups/:groupId/members](#86-post-apigroupsgroupidmembers)
 9. [Admin Oversight & Management](#9-admin-oversight--management)
    - [GET /api/admin/users](#91-get-apiadminusers)
    - [PATCH /api/admin/users/:userEmail/role](#92-patch-apiadminusersuseremailrole)
@@ -636,6 +638,86 @@ The seed script (`npm run db:seed`) provides authentic test accounts:
   - `404 NOT_FOUND`: Group does not exist.
 - **Database Impact:**
   - Inserts 1 row into `group_chat_messages`.
+
+---
+
+### 8.5. `GET /api/groups/:groupId/members`
+- **Purpose:** Retrieves the list of all members in a group channel, returning member names, emails, avatars, join dates, and group creator status.
+- **Authentication:** Bearer token required (`{{accessToken}}`).
+- **Authorization:** Caller must be a member of the group, or an admin.
+- **URL Parameters:**
+  - `groupId`: UUID of the group (e.g., `{{groupId}}`).
+- **Headers:**
+  - `Authorization: Bearer {{accessToken}}`
+- **Expected Success (200 OK):**
+  ```json
+  {
+    "success": true,
+    "data": [
+      {
+        "email": "alex@example.com",
+        "name": "Alex Morgan",
+        "avatar_url": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200",
+        "joined_at": "2026-10-11T13:35:00.000Z",
+        "is_creator": true
+      },
+      {
+        "email": "sam@example.com",
+        "name": "Sam Rivera",
+        "avatar_url": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200",
+        "joined_at": "2026-10-11T13:35:00.000Z",
+        "is_creator": false
+      }
+    ]
+  }
+  ```
+- **Failure Cases:**
+  - `400 VALIDATION_ERROR`: Invalid UUID format for `groupId`.
+  - `401 UNAUTHORIZED`: Missing, expired, or invalid token.
+  - `403 FORBIDDEN`: Caller is neither a member of the group nor an admin.
+  - `404 NOT_FOUND`: Group does not exist.
+- **Database Impact:** Reads `group_members` joined with `users` and `groups`.
+
+---
+
+### 8.6. `POST /api/groups/:groupId/members`
+- **Purpose:** Adds a new user to an existing group. Strictly restricted to the group creator (`loggedInUser.email === group.creator_email`).
+- **Authentication:** Bearer token required (`{{creatorAccessToken}}`).
+- **Authorization:** Only the group creator can add members (enforced on server).
+- **URL Parameters:**
+  - `groupId`: UUID of the group (e.g., `{{groupId}}`).
+- **Headers:**
+  - `Authorization: Bearer {{creatorAccessToken}}`
+  - `Content-Type: application/json`
+- **Request Body:**
+  ```json
+  {
+    "user_email": "user2@example.com"
+  }
+  ```
+- **Expected Success (201 Created):**
+  ```json
+  {
+    "success": true,
+    "data": {
+      "group_id": "84c8a291-7f89-498c-b03a-330fe53f7f50",
+      "user_email": "user2@example.com",
+      "name": "User Two",
+      "avatar_url": null,
+      "joined_at": "2026-10-12T12:00:00.000Z",
+      "member_count": 3
+    }
+  }
+  ```
+- **Failure Cases:**
+  - `400 BAD_REQUEST / VALIDATION_ERROR`: Missing/invalid email or deactivated target user.
+  - `401 UNAUTHORIZED`: Missing or invalid token.
+  - `403 FORBIDDEN`: Caller is not the group creator (`Only the group creator can add members`).
+  - `404 NOT_FOUND`: Group does not exist or target user does not exist in `users`.
+  - `409 CONFLICT`: Target user is already a member of the group.
+- **Database Impact:**
+  - Inserts 1 row into `group_members`.
+  - Inserts 1 audit event into `activity_logs` (`action: "GROUP_ADD_MEMBER"`).
 
 ---
 

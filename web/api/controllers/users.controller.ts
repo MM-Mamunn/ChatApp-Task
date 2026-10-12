@@ -64,7 +64,7 @@ const searchQuerySchema = z
   })
   .transform((data) => ({
     query: (data.query !== undefined ? data.query : data.search || "").trim(),
-    limit: Math.min(Math.max(data.limit, 1), 20),
+    limit: Math.min(Math.max(data.limit, 1), 50),
   }));
 
 function handleControllerError(err: unknown): Response {

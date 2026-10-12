@@ -19,11 +19,13 @@ import {
   MessageSquareIcon,
 } from "../ui/icons";
 import type { ActiveTarget } from "./sidebar";
+import { GroupMembersModal } from "./group-members-modal";
 
 interface ChatPaneProps {
   activeTarget: ActiveTarget;
   onBackToSidebar?: () => void;
   onMessageSentSuccess?: () => void;
+  onGroupUpdated?: (groupId: string, newMemberCount: number) => void;
 }
 
 type UnifiedMessage = {
@@ -67,6 +69,7 @@ export function ChatPane({
   activeTarget,
   onBackToSidebar,
   onMessageSentSuccess,
+  onGroupUpdated,
 }: ChatPaneProps) {
   const { user: currentUser } = useAuth();
   const [messages, setMessages] = useState<UnifiedMessage[]>([]);
@@ -74,6 +77,9 @@ export function ChatPane({
   const [hasMore, setHasMore] = useState(false);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [isLoadingEarlier, setIsLoadingEarlier] = useState(false);
+
+  // Group members modal state
+  const [isGroupMembersOpen, setIsGroupMembersOpen] = useState(false);
 
   // Load error
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -544,10 +550,25 @@ export function ChatPane({
                 <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">
                   {activeTarget.groupName}
                 </h2>
-                <div className="flex items-center gap-1.5 text-xs text-slate-400">
-                  <UsersIcon className="w-3.5 h-3.5 text-indigo-500" />
-                  <span>{activeTarget.memberCount} members</span>
-                </div>
+                {(() => {
+                  const displayCount = activeTarget.memberCount;
+                  return (
+                    <button
+                      type="button"
+                      onClick={() => setIsGroupMembersOpen(true)}
+                      aria-label={`View group members (${displayCount} ${
+                        displayCount === 1 ? "member" : "members"
+                      })`}
+                      className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer group rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                    >
+                      <UsersIcon className="w-3.5 h-3.5 text-indigo-500 group-hover:scale-110 transition-transform" />
+                      <span className="underline underline-offset-2 decoration-slate-300 dark:decoration-slate-700 group-hover:decoration-indigo-500 font-medium">
+                        {displayCount}{" "}
+                        {displayCount === 1 ? "member" : "members"}
+                      </span>
+                    </button>
+                  );
+                })()}
               </div>
             </>
           )}
@@ -750,6 +771,20 @@ export function ChatPane({
           </button>
         </form>
       </div>
+
+      {/* Group Members Modal */}
+      {activeTarget?.type === "group" && (
+        <GroupMembersModal
+          isOpen={isGroupMembersOpen}
+          onClose={() => setIsGroupMembersOpen(false)}
+          groupId={activeTarget.groupId}
+          groupName={activeTarget.groupName}
+          creatorEmail={activeTarget.creatorEmail}
+          onMemberAdded={(newCount) => {
+            onGroupUpdated?.(activeTarget.groupId, newCount);
+          }}
+        />
+      )}
     </div>
   );
 }

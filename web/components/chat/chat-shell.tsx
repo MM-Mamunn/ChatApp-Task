@@ -142,8 +142,25 @@ export function ChatShell() {
       groupId: resolvedGroupId,
       groupName: group.name,
       memberCount: group.member_count,
+      creatorEmail: group.creator_email || group.created_by,
     });
     refreshConversations();
+  };
+
+  // Immediate UI update when members are added to a group
+  const handleGroupUpdated = (groupId: string, newMemberCount: number) => {
+    setGroupList((prev) =>
+      prev.map((g) =>
+        (g.group_id || g.id) === groupId
+          ? { ...g, member_count: newMemberCount }
+          : g,
+      ),
+    );
+    setActiveTarget((prev) =>
+      prev && prev.type === "group" && prev.groupId === groupId
+        ? { ...prev, memberCount: newMemberCount }
+        : prev,
+    );
   };
 
   return (
@@ -175,6 +192,7 @@ export function ChatShell() {
           activeTarget={activeTarget}
           onBackToSidebar={() => setActiveTarget(null)}
           onMessageSentSuccess={() => refreshConversations()}
+          onGroupUpdated={handleGroupUpdated}
         />
       </div>
 

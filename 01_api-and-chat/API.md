@@ -845,8 +845,79 @@ List endpoints for messages and activity logs utilize **timestamp cursor paginat
 - **Errors:**
   - `400 VALIDATION_ERROR`: Empty or whitespace-only message.
   - `403 FORBIDDEN`: Caller is not a group member.
+  - `404 NOT_FOUND`: Group does not exist.
 
 ---
+
+#### `GET /api/groups/{groupId}/members`
+- **Purpose:** Retrieves the list of members belonging to a group channel, including name, email, avatar, join timestamp, and creator status.
+- **Access:** Authenticated (caller must be an active group member, or an admin for platform oversight).
+- **Path Parameters:**
+  - `groupId` (string, required): Valid UUID of the target group channel.
+- **Headers:** `Authorization: Bearer <accessToken>`
+- **Response (200 OK):**
+  ```json
+  {
+    "success": true,
+    "data": [
+      {
+        "email": "user@example.com",
+        "name": "Jane User",
+        "avatar_url": null,
+        "joined_at": "2026-10-11T09:50:00.000Z",
+        "is_creator": true
+      },
+      {
+        "email": "alice@example.com",
+        "name": "Alice Smith",
+        "avatar_url": null,
+        "joined_at": "2026-10-11T09:50:00.000Z",
+        "is_creator": false
+      }
+    ]
+  }
+  ```
+- **Errors:**
+  - `400 VALIDATION_ERROR`: Invalid `groupId` UUID format.
+  - `401 UNAUTHORIZED`: Missing, invalid, or expired access token.
+  - `403 FORBIDDEN`: Caller is not a member of the requested group.
+  - `404 NOT_FOUND`: Group does not exist.
+
+---
+
+#### `POST /api/groups/{groupId}/members`
+- **Purpose:** Adds an existing registered user to the group channel. Strictly authorized to the group's creator.
+- **Access:** Authenticated (strictly enforced on backend: `loggedInUser.email === group.creator_email`).
+- **Path Parameters:**
+  - `groupId` (string, required): Valid UUID of the target group channel.
+- **Headers:** `Authorization: Bearer <accessToken>`, `Content-Type: application/json`
+- **Request Body:**
+  ```json
+  {
+    "user_email": "bob@example.com"
+  }
+  ```
+- **Response (201 Created):**
+  ```json
+  {
+    "success": true,
+    "data": {
+      "group_id": "84c8a291-7f89-498c-b03a-330fe53f7f50",
+      "user_email": "bob@example.com",
+      "name": "Bob Jones",
+      "avatar_url": null,
+      "joined_at": "2026-10-12T12:00:00.000Z",
+      "member_count": 3
+    }
+  }
+  ```
+- **Errors:**
+  - `400 BAD_REQUEST / VALIDATION_ERROR`: Missing/invalid email or deactivated target user.
+  - `401 UNAUTHORIZED`: Missing, invalid, or expired access token.
+  - `403 FORBIDDEN`: Caller is not the group creator (`Only the group creator can add members`).
+  - `404 NOT_FOUND`: Group does not exist or target user does not exist in `users` table.
+  - `409 CONFLICT`: Target user is already a member of this group (`User is already a member of this group`).
+- **Audit Logging:** Inserts `GROUP_ADD_MEMBER` into `activity_logs`.
 
 ### 8.6 Admin Oversight & Management
 

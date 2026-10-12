@@ -214,6 +214,7 @@ npm run test:security   # Zod validation, missing env, CORS, security headers, e
 npm run test:auth       # Bcrypt cost 12, JWT access tokens, refresh rotation, logout, bootstrap
 npm run test:rbac       # RBAC permission matrix, user search masking, role changes, deactivation
 npm run test:chat       # Direct chats, groups, message pagination, membership checks
+npm run test:members    # Group members management, creator-only add checks, duplicate guards
 npm run test:login      # Login error formats (401, 400), bcrypt storage, test account verification
 npm run test:realtime   # Live Supabase Realtime WebSocket message push verification
 

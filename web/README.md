@@ -30,23 +30,24 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Available Scripts
 
-| Command                 | Description                                                           |
-| ----------------------- | --------------------------------------------------------------------- |
-| `npm run dev`           | Starts Next.js development server with Turbopack                      |
-| `npm run build`         | Compiles production build                                             |
-| `npm run start`         | Starts Next.js production server                                      |
-| `npm run lint`          | Runs ESLint analysis                                                  |
-| `npm run format:check`  | Verifies Prettier code style                                          |
-| `npm run format`        | Automatically formats files using Prettier                            |
-| `npm run test:all`      | Runs all automated test suites (security, auth, rbac, chat, realtime) |
-| `npm run test:security` | Tests Zod validations, error envelopes, and CORS baseline             |
-| `npm run test:auth`     | Tests bcrypt hashing, JWT access tokens, and refresh token rotation   |
-| `npm run test:rbac`     | Tests role-based authorization matrix and admin oversight             |
-| `npm run test:chat`     | Tests direct and group chat endpoints and message pagination          |
-| `npm run test:realtime` | Tests Supabase Realtime WebSocket message push delivery               |
-| `npm run db:generate`   | Generates Drizzle Kit schema migrations                               |
-| `npm run db:migrate`    | Applies migrations to PostgreSQL database                             |
-| `npm run db:seed`       | Seeds test accounts and initial data                                  |
+| Command                 | Description                                                              |
+| ----------------------- | ------------------------------------------------------------------------ |
+| `npm run dev`           | Starts Next.js development server with Turbopack                         |
+| `npm run build`         | Compiles production build                                                |
+| `npm run start`         | Starts Next.js production server                                         |
+| `npm run lint`          | Runs ESLint analysis                                                     |
+| `npm run format:check`  | Verifies Prettier code style                                             |
+| `npm run format`        | Automatically formats files using Prettier                               |
+| `npm run test:all`      | Runs all automated test suites (security, auth, rbac, chat, realtime)    |
+| `npm run test:security` | Tests Zod validations, error envelopes, and CORS baseline                |
+| `npm run test:auth`     | Tests bcrypt hashing, JWT access tokens, and refresh token rotation      |
+| `npm run test:rbac`     | Tests role-based authorization matrix and admin oversight                |
+| `npm run test:chat`     | Tests direct and group chat endpoints and message pagination             |
+| `npm run test:members`  | Tests group members listing, creator authorization, and duplicate guards |
+| `npm run test:realtime` | Tests Supabase Realtime WebSocket message push delivery                  |
+| `npm run db:generate`   | Generates Drizzle Kit schema migrations                                  |
+| `npm run db:migrate`    | Applies migrations to PostgreSQL database                                |
+| `npm run db:seed`       | Seeds test accounts and initial data                                     |
 
 ## Test Accounts
 

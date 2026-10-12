@@ -98,6 +98,14 @@ export interface GroupItem {
   }>;
 }
 
+export interface GroupMemberItem {
+  email: string;
+  name: string | null;
+  avatar_url: string | null;
+  joined_at: string;
+  is_creator: boolean;
+}
+
 export interface GroupMessageItem {
   id?: string;
   group_id: string;
@@ -581,6 +589,51 @@ class ApiClient {
         body: JSON.stringify({ message }),
       },
     );
+  }
+
+  public async getGroupMembers(
+    groupId: string,
+  ): Promise<ApiResponse<GroupMemberItem[]>> {
+    if (!groupId || groupId === "undefined") {
+      return {
+        success: false,
+        error: {
+          code: "VALIDATION_ERROR",
+          message: "A valid group ID is required to fetch members.",
+        },
+      };
+    }
+    return this.request<GroupMemberItem[]>(
+      `/api/groups/${encodeURIComponent(groupId)}/members`,
+    );
+  }
+
+  public async addGroupMember(
+    groupId: string,
+    userEmail: string,
+  ): Promise<
+    ApiResponse<{
+      group_id: string;
+      user_email: string;
+      name: string | null;
+      avatar_url: string | null;
+      joined_at: string;
+      member_count: number;
+    }>
+  > {
+    if (!groupId || groupId === "undefined") {
+      return {
+        success: false,
+        error: {
+          code: "VALIDATION_ERROR",
+          message: "A valid group ID is required to add members.",
+        },
+      };
+    }
+    return this.request(`/api/groups/${encodeURIComponent(groupId)}/members`, {
+      method: "POST",
+      body: JSON.stringify({ user_email: userEmail }),
+    });
   }
 
   // ==========================================
