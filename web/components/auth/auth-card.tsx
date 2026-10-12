@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/lib/auth-context";
+import { formatHttpStatus } from "@/lib/api-client";
 import {
   Loader2Icon,
   EyeIcon,
@@ -10,10 +11,17 @@ import {
   MessageSquareIcon,
   ShieldIcon,
   UserIcon,
+  AlertTriangleIcon,
 } from "../ui/icons";
 
 interface AuthCardProps {
   onSuccess?: () => void;
+}
+
+interface AuthErrorState {
+  statusText?: string | null;
+  message: string;
+  details?: Array<{ field?: string; issue: string }>;
 }
 
 export function AuthCard({ onSuccess }: AuthCardProps) {
@@ -28,19 +36,39 @@ export function AuthCard({ onSuccess }: AuthCardProps) {
 
   // Status
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [authError, setAuthError] = useState<AuthErrorState | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrorMessage(null);
+    setAuthError(null);
 
+    // Client-side validation with explicit 400 status formatting
     if (!email.trim() || !password) {
-      setErrorMessage("Please provide both email and password.");
+      setAuthError({
+        statusText: "400 (Bad Request)",
+        message:
+          !email.trim() && !password
+            ? "Please enter your email address and password."
+            : !email.trim()
+              ? "Please enter your email address."
+              : "Please enter your password.",
+      });
       return;
     }
 
     if (mode === "register" && !name.trim()) {
-      setErrorMessage("Please enter your name.");
+      setAuthError({
+        statusText: "400 (Bad Request)",
+        message: "Please enter your full name.",
+      });
+      return;
+    }
+
+    if (mode === "register" && password.length < 8) {
+      setAuthError({
+        statusText: "400 (Bad Request)",
+        message: "Password must be at least 8 characters long.",
+      });
       return;
     }
 
@@ -50,7 +78,34 @@ export function AuthCard({ onSuccess }: AuthCardProps) {
       if (mode === "login") {
         const result = await login({ email: email.trim(), password });
         if (!result.success) {
-          setErrorMessage(result.error || "Invalid email or password.");
+          const statusText =
+            result.status && result.status > 0
+              ? formatHttpStatus(result.status)
+              : result.code === "NETWORK_ERROR" || result.status === 0
+                ? "Network Error"
+                : "401 (Unauthorized)";
+
+          let message = result.error || "Invalid email or password.";
+          if (result.status === 0 || result.code === "NETWORK_ERROR") {
+            message =
+              "Unable to reach the authentication server. Please check your network connection and try again.";
+          } else if (result.status === 500) {
+            message =
+              "An unexpected server error occurred. Please try again later.";
+          } else if (result.details && result.details.length > 0) {
+            const first = result.details[0];
+            if (first?.issue) {
+              message = first.field
+                ? `${first.field}: ${first.issue}`
+                : first.issue;
+            }
+          }
+
+          setAuthError({
+            statusText,
+            message,
+            details: result.details,
+          });
         } else {
           onSuccess?.();
         }
@@ -61,7 +116,34 @@ export function AuthCard({ onSuccess }: AuthCardProps) {
           name: name.trim(),
         });
         if (!result.success) {
-          setErrorMessage(result.error || "Failed to create account.");
+          const statusText =
+            result.status && result.status > 0
+              ? formatHttpStatus(result.status)
+              : result.code === "NETWORK_ERROR" || result.status === 0
+                ? "Network Error"
+                : "400 (Bad Request)";
+
+          let message = result.error || "Failed to create account.";
+          if (result.status === 0 || result.code === "NETWORK_ERROR") {
+            message =
+              "Unable to reach the authentication server. Please check your network connection and try again.";
+          } else if (result.status === 500) {
+            message =
+              "An unexpected server error occurred. Please try again later.";
+          } else if (result.details && result.details.length > 0) {
+            const first = result.details[0];
+            if (first?.issue) {
+              message = first.field
+                ? `${first.field}: ${first.issue}`
+                : first.issue;
+            }
+          }
+
+          setAuthError({
+            statusText,
+            message,
+            details: result.details,
+          });
         } else {
           onSuccess?.();
         }
@@ -80,7 +162,7 @@ export function AuthCard({ onSuccess }: AuthCardProps) {
     setEmail(accountEmail);
     setPassword(accountPass);
     if (accountName) setName(accountName);
-    setErrorMessage(null);
+    setAuthError(null);
   };
 
   return (
@@ -113,7 +195,7 @@ export function AuthCard({ onSuccess }: AuthCardProps) {
             aria-selected={mode === "login"}
             onClick={() => {
               setMode("login");
-              setErrorMessage(null);
+              setAuthError(null);
             }}
             className={`py-2 px-3 rounded-lg transition-all cursor-pointer ${
               mode === "login"
@@ -129,7 +211,7 @@ export function AuthCard({ onSuccess }: AuthCardProps) {
             aria-selected={mode === "register"}
             onClick={() => {
               setMode("register");
-              setErrorMessage(null);
+              setAuthError(null);
             }}
             className={`py-2 px-3 rounded-lg transition-all cursor-pointer ${
               mode === "register"
@@ -142,22 +224,50 @@ export function AuthCard({ onSuccess }: AuthCardProps) {
         </div>
 
         {/* Error notification */}
-        <AnimatePresence mode="wait">
-          {errorMessage && (
+        <AnimatePresence>
+          {authError && (
             <motion.div
+              key="auth-error-banner"
+              role="alert"
+              aria-live="assertive"
               initial={{ opacity: 0, y: -6 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
-              className="mb-5 p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-rose-700 dark:text-rose-300 text-sm flex items-start gap-2.5"
+              className="mb-5 p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-rose-700 dark:text-rose-300 text-sm flex items-start gap-2.5 shadow-sm"
             >
-              <span className="shrink-0 mt-0.5 font-bold">!</span>
-              <p className="flex-1 leading-snug">{errorMessage}</p>
+              <AlertTriangleIcon className="w-4 h-4 shrink-0 mt-0.5 text-rose-600 dark:text-rose-400" />
+              <div className="flex-1 space-y-1">
+                {authError.statusText && (
+                  <div className="flex items-center gap-1.5">
+                    <span className="inline-block px-1.5 py-0.5 rounded bg-rose-100 dark:bg-rose-900/60 text-rose-800 dark:text-rose-200 text-[11px] font-mono font-bold">
+                      {authError.statusText}
+                    </span>
+                  </div>
+                )}
+                <p className="text-xs leading-snug font-medium text-rose-700 dark:text-rose-300">
+                  {authError.message}
+                </p>
+                {authError.details && authError.details.length > 0 && (
+                  <ul className="text-[11px] list-disc list-inside space-y-0.5 text-rose-600 dark:text-rose-400 pt-0.5">
+                    {authError.details.map((detail, idx) => (
+                      <li key={idx}>
+                        {detail.field ? (
+                          <span className="font-semibold">
+                            {detail.field}:{" "}
+                          </span>
+                        ) : null}
+                        {detail.issue}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} noValidate className="space-y-4">
           {mode === "register" && (
             <div>
               <label
@@ -264,45 +374,11 @@ export function AuthCard({ onSuccess }: AuthCardProps) {
           <div className="grid grid-cols-3 gap-2">
             <button
               type="button"
-              aria-label="Quick-fill Alex test account (user role)"
-              onClick={() =>
-                fillQuickAccount(
-                  "alex@example.com",
-                  "SecurePassword123!",
-                  "Alex",
-                )
-              }
-              className="flex flex-col items-center justify-center p-2 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-indigo-400 dark:hover:border-indigo-500 bg-slate-50 dark:bg-slate-800/60 hover:bg-indigo-50/50 dark:hover:bg-indigo-950/30 text-left transition-all group cursor-pointer"
-            >
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
-                <UserIcon className="w-3.5 h-3.5" />
-                <span>Alex</span>
-              </div>
-              <span className="text-[10px] text-slate-400">User</span>
-            </button>
-
-            <button
-              type="button"
-              aria-label="Quick-fill Sam test account (user role)"
-              onClick={() =>
-                fillQuickAccount("sam@example.com", "SecurePassword123!", "Sam")
-              }
-              className="flex flex-col items-center justify-center p-2 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-indigo-400 dark:hover:border-indigo-500 bg-slate-50 dark:bg-slate-800/60 hover:bg-indigo-50/50 dark:hover:bg-indigo-950/30 text-left transition-all group cursor-pointer"
-            >
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
-                <UserIcon className="w-3.5 h-3.5" />
-                <span>Sam</span>
-              </div>
-              <span className="text-[10px] text-slate-400">User</span>
-            </button>
-
-            <button
-              type="button"
               aria-label="Quick-fill Admin test account (admin role)"
               onClick={() =>
                 fillQuickAccount(
-                  "admin@example.com",
-                  "AdminSecret123!",
+                  "admin1@example.com",
+                  "admin1@example.com",
                   "Admin",
                 )
               }
@@ -315,6 +391,44 @@ export function AuthCard({ onSuccess }: AuthCardProps) {
               <span className="text-[10px] text-amber-500 font-medium">
                 Admin
               </span>
+            </button>
+
+            <button
+              type="button"
+              aria-label="Quick-fill User 1 test account (user role)"
+              onClick={() =>
+                fillQuickAccount(
+                  "user1@example.com",
+                  "user1@example.com",
+                  "User 1",
+                )
+              }
+              className="flex flex-col items-center justify-center p-2 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-indigo-400 dark:hover:border-indigo-500 bg-slate-50 dark:bg-slate-800/60 hover:bg-indigo-50/50 dark:hover:bg-indigo-950/30 text-left transition-all group cursor-pointer"
+            >
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
+                <UserIcon className="w-3.5 h-3.5" />
+                <span>User 1</span>
+              </div>
+              <span className="text-[10px] text-slate-400">User</span>
+            </button>
+
+            <button
+              type="button"
+              aria-label="Quick-fill User 2 test account (user role)"
+              onClick={() =>
+                fillQuickAccount(
+                  "user2@example.com",
+                  "user2@example.com",
+                  "User 2",
+                )
+              }
+              className="flex flex-col items-center justify-center p-2 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-indigo-400 dark:hover:border-indigo-500 bg-slate-50 dark:bg-slate-800/60 hover:bg-indigo-50/50 dark:hover:bg-indigo-950/30 text-left transition-all group cursor-pointer"
+            >
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
+                <UserIcon className="w-3.5 h-3.5" />
+                <span>User 2</span>
+              </div>
+              <span className="text-[10px] text-slate-400">User</span>
             </button>
           </div>
         </div>

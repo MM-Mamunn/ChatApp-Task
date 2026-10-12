@@ -9,6 +9,14 @@ import React, {
 } from "react";
 import { apiClient, type UserProfile } from "./api-client";
 
+export interface AuthResult {
+  success: boolean;
+  error?: string;
+  status?: number;
+  code?: string;
+  details?: Array<{ field?: string; issue: string }>;
+}
+
 interface AuthContextType {
   user: UserProfile | null;
   accessToken: string | null;
@@ -17,12 +25,12 @@ interface AuthContextType {
   login: (credentials: {
     email: string;
     password: string;
-  }) => Promise<{ success: boolean; error?: string }>;
+  }) => Promise<AuthResult>;
   register: (payload: {
     email: string;
     password: string;
     name: string;
-  }) => Promise<{ success: boolean; error?: string }>;
+  }) => Promise<AuthResult>;
   logout: () => Promise<void>;
   updateProfile: (payload: {
     name?: string;
@@ -81,8 +89,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = useCallback(
-    async (credentials: { email: string; password: string }) => {
-      setIsLoading(true);
+    async (credentials: {
+      email: string;
+      password: string;
+    }): Promise<AuthResult> => {
       try {
         const res = await apiClient.login(credentials);
         if (res.success && res.data) {
@@ -93,6 +103,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return {
           success: false,
           error: res.error?.message || "Failed to sign in",
+          status: res.status ?? res.error?.status,
+          code: res.error?.code,
+          details: res.error?.details,
         };
       } catch (err: unknown) {
         return {
@@ -101,17 +114,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             err instanceof Error
               ? err.message
               : "Unexpected error during login",
+          status: 0,
         };
-      } finally {
-        setIsLoading(false);
       }
     },
     [],
   );
 
   const register = useCallback(
-    async (payload: { email: string; password: string; name: string }) => {
-      setIsLoading(true);
+    async (payload: {
+      email: string;
+      password: string;
+      name: string;
+    }): Promise<AuthResult> => {
       try {
         const res = await apiClient.register(payload);
         if (res.success && res.data) {
@@ -122,6 +137,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return {
           success: false,
           error: res.error?.message || "Failed to create account",
+          status: res.status ?? res.error?.status,
+          code: res.error?.code,
+          details: res.error?.details,
         };
       } catch (err: unknown) {
         return {
@@ -130,9 +148,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             err instanceof Error
               ? err.message
               : "Unexpected error during registration",
+          status: 0,
         };
-      } finally {
-        setIsLoading(false);
       }
     },
     [],

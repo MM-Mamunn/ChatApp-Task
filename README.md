@@ -146,12 +146,14 @@ The seed script creates the following pre-configured test accounts (also availab
 
 | Name | Email | Password | Role | Purpose |
 | --- | --- | --- | --- | --- |
-| **Admin** | `admin@example.com` | `AdminSecret123!` | `admin` | Full administrative oversight, user management, audit logs |
-| **Alex** | `alex@example.com` | `SecurePassword123!` | `user` | Standard chat participant |
-| **Sam** | `sam@example.com` | `SecurePassword123!` | `user` | Standard chat participant |
-| **Alice** | `alice@chat.local` | `AlicePass123!` | `user` | Additional test account |
-| **Bob** | `bob@chat.local` | `BobPass123!` | `user` | Additional test account |
-| **Charlie** | `charlie@chat.local` | `CharliePass123!` | `user` | Additional test account |
+| **Admin** | `admin1@example.com` | `admin1@example.com` | `admin` | Full administrative oversight, user management, audit logs |
+| **User 1** | `user1@example.com` | `user1@example.com` | `user` | Standard chat participant |
+| **User 2** | `user2@example.com` | `user2@example.com` | `user` | Standard chat participant |
+| **Alice** | `alice@chat.local` | `AliceSecret123!` | `user` | Automated test suite account |
+| **Bob** | `bob@chat.local` | `BobSecret123!` | `user` | Automated test suite account |
+
+> [!NOTE]
+> These credentials are for local development and review evaluation only, not production credentials. All passwords are stored as bcrypt hashes (cost factor 12) in the database.
 
 ### Creating New Accounts:
 Users can also register new accounts directly from the UI:

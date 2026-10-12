@@ -50,8 +50,10 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Test Accounts
 
-Seed accounts available on login (or via 1-click quick-fill buttons):
+Development/testing accounts available on login (or via 1-click quick-fill buttons):
 
-- **Admin**: `admin@example.com` / `AdminSecret123!`
-- **Alex (User)**: `alex@example.com` / `SecurePassword123!`
-- **Sam (User)**: `sam@example.com` / `SecurePassword123!`
+- **Admin**: `admin1@example.com` / `admin1@example.com` (Role: `admin`)
+- **User 1**: `user1@example.com` / `user1@example.com` (Role: `user`)
+- **User 2**: `user2@example.com` / `user2@example.com` (Role: `user`)
+
+_Note: For local development and review testing only. Passwords are saved as bcrypt hashes (cost factor 12)._

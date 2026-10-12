@@ -6,10 +6,12 @@
 
 export interface ApiResponse<T = unknown> {
   success: boolean;
+  status?: number;
   data?: T;
   error?: {
     code: string;
     message: string;
+    status?: number;
     details?: Array<{ field?: string; issue: string }>;
   };
   pagination?: {
@@ -17,6 +19,29 @@ export interface ApiResponse<T = unknown> {
     has_more: boolean;
     next_cursor: string | null;
   };
+}
+
+/**
+ * Maps standard HTTP status codes to formatted strings, e.g. "401 (Unauthorized)".
+ */
+export function formatHttpStatus(status?: number): string | null {
+  if (!status || status <= 0) return null;
+  const statusTexts: Record<number, string> = {
+    400: "Bad Request",
+    401: "Unauthorized",
+    403: "Forbidden",
+    404: "Not Found",
+    408: "Request Timeout",
+    409: "Conflict",
+    422: "Unprocessable Entity",
+    429: "Too Many Requests",
+    500: "Internal Server Error",
+    502: "Bad Gateway",
+    503: "Service Unavailable",
+    504: "Gateway Timeout",
+  };
+  const text = statusTexts[status] || "Error";
+  return `${status} (${text})`;
 }
 
 export interface UserProfile {
@@ -183,9 +208,11 @@ class ApiClient {
           : "Network error occurred";
       return {
         success: false,
+        status: 0,
         error: {
           code: "NETWORK_ERROR",
           message: msg,
+          status: 0,
         },
       };
     }
@@ -207,6 +234,10 @@ class ApiClient {
             credentials: "same-origin",
           });
           const retryData = (await retryRes.json()) as ApiResponse<T>;
+          retryData.status = retryRes.status;
+          if (retryData.error && !retryData.error.status) {
+            retryData.error.status = retryRes.status;
+          }
           return retryData;
         } catch {
           // Fall through to original response
@@ -216,13 +247,19 @@ class ApiClient {
 
     try {
       const json = (await response.json()) as ApiResponse<T>;
+      json.status = response.status;
+      if (json.error && !json.error.status) {
+        json.error.status = response.status;
+      }
       return json;
     } catch {
       return {
         success: false,
+        status: response.status,
         error: {
           code: "INVALID_JSON_RESPONSE",
           message: `Server returned status ${response.status} with unparseable body`,
+          status: response.status,
         },
       };
     }

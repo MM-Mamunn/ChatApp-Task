@@ -193,14 +193,14 @@ The page layout is structured into 6 focused sections:
 #### Section 5: Evaluator Quick-Start & Test Accounts (`<LandingEvaluatorGuide />`)
 - **Purpose:** Eliminate all friction for the reviewer evaluating the assignment.
 - **Test Credentials Table:**
-  - `admin@example.com` | `AdminSecret123!` | Role: `admin` | Full user management, audit logs, conversation inspection
-  - `alex@example.com` | `SecurePassword123!` | Role: `user` | Standard chat participant
-  - `sam@example.com` | `SecurePassword123!` | Role: `user` | Standard chat participant
+  - `admin1@example.com` | `admin1@example.com` | Role: `admin` | Full user management, audit logs, conversation inspection
+  - `user1@example.com` | `user1@example.com` | Role: `user` | Standard chat participant
+  - `user2@example.com` | `user2@example.com` | Role: `user` | Standard chat participant
 - **Evaluation Guide Steps:**
   1. Open two browser windows (or one incognito window).
-  2. Log into Window 1 as Alex, and Window 2 as Sam.
+  2. Log into Window 1 as User 1 (`user1@example.com`), and Window 2 as User 2 (`user2@example.com`).
   3. Send a message and observe instant real-time synchronization with zero page reload.
-  4. Log into Window 1 as Admin, open `/admin`, and inspect audit trails and platform conversations in read-only mode.
+  4. Log into Window 1 as Admin (`admin1@example.com`), open `/admin`, and inspect audit trails and platform conversations in read-only mode.
 
 #### Section 6: Footer (`<LandingFooter />`)
 - **Project Identity:** Secure Realtime Chat Application — Part 2 Showcase.
