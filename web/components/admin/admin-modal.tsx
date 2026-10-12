@@ -447,7 +447,7 @@ export function AdminModal({ isOpen, onClose }: AdminModalProps) {
           <div
             role="tablist"
             aria-label="Admin console navigation"
-            className="px-6 pt-3 pb-2 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center gap-2 shrink-0"
+            className="px-3 sm:px-6 pt-3 pb-2 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center gap-1.5 sm:gap-2 shrink-0 overflow-x-auto scrollbar-none"
           >
             <button
               type="button"
@@ -457,7 +457,7 @@ export function AdminModal({ isOpen, onClose }: AdminModalProps) {
                 setActiveTab("users");
                 if (usersList.length === 0) fetchUsers();
               }}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+              className={`flex items-center gap-2 px-3 sm:px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer shrink-0 whitespace-nowrap ${
                 activeTab === "users"
                   ? "bg-indigo-600 text-white shadow-sm shadow-indigo-600/20"
                   : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
@@ -484,7 +484,7 @@ export function AdminModal({ isOpen, onClose }: AdminModalProps) {
                 setActiveTab("activity");
                 if (activities.length === 0) fetchActivity(actionFilter);
               }}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+              className={`flex items-center gap-2 px-3 sm:px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer shrink-0 whitespace-nowrap ${
                 activeTab === "activity"
                   ? "bg-indigo-600 text-white shadow-sm shadow-indigo-600/20"
                   : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
@@ -502,7 +502,7 @@ export function AdminModal({ isOpen, onClose }: AdminModalProps) {
                 setActiveTab("conversations");
                 if (!conversationsOverview) fetchConversations();
               }}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+              className={`flex items-center gap-2 px-3 sm:px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer shrink-0 whitespace-nowrap ${
                 activeTab === "conversations"
                   ? "bg-indigo-600 text-white shadow-sm shadow-indigo-600/20"
                   : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
@@ -512,7 +512,7 @@ export function AdminModal({ isOpen, onClose }: AdminModalProps) {
               <span>Conversations Oversight</span>
             </button>
 
-            <div className="ml-auto flex items-center gap-2">
+            <div className="ml-auto flex items-center gap-2 shrink-0">
               <button
                 type="button"
                 onClick={() => {
@@ -529,7 +529,7 @@ export function AdminModal({ isOpen, onClose }: AdminModalProps) {
           </div>
 
           {/* Modal Tab Content Area */}
-          <div className="flex-1 overflow-y-auto p-6 bg-slate-50/50 dark:bg-slate-950/20">
+          <div className="flex-1 overflow-y-auto overflow-x-hidden p-3.5 sm:p-6 bg-slate-50/50 dark:bg-slate-950/20 min-w-0">
             {/* ========================================================== */}
             {/* TAB 1: USERS & RBAC                                        */}
             {/* ========================================================== */}
@@ -901,15 +901,15 @@ export function AdminModal({ isOpen, onClose }: AdminModalProps) {
             {activeTab === "conversations" && (
               <div className="space-y-4">
                 {/* Sub-tabs & Search */}
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-                  <div className="flex items-center gap-1 bg-white dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-800">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 min-w-0">
+                  <div className="grid grid-cols-2 sm:flex sm:items-center gap-1 bg-white dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-800 w-full sm:w-auto shrink-0">
                     <button
                       type="button"
                       onClick={() => {
                         setConvSubTab("direct");
                         setInspectingPair(null);
                       }}
-                      className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                      className={`px-3 py-1.5 sm:py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer text-center truncate ${
                         convSubTab === "direct"
                           ? "bg-indigo-600 text-white shadow-sm"
                           : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
@@ -925,7 +925,7 @@ export function AdminModal({ isOpen, onClose }: AdminModalProps) {
                         setConvSubTab("groups");
                         setInspectingPair(null);
                       }}
-                      className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                      className={`px-3 py-1.5 sm:py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer text-center truncate ${
                         convSubTab === "groups"
                           ? "bg-indigo-600 text-white shadow-sm"
                           : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
@@ -936,7 +936,7 @@ export function AdminModal({ isOpen, onClose }: AdminModalProps) {
                     </button>
                   </div>
 
-                  <div className="relative flex-1 max-w-sm">
+                  <div className="relative flex-1 sm:max-w-xs md:max-w-sm w-full">
                     <SearchIcon className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                     <input
                       type="text"
@@ -957,29 +957,41 @@ export function AdminModal({ isOpen, onClose }: AdminModalProps) {
 
                 {/* Inspecting Pair Overlay / Embedded Viewer */}
                 {inspectingPair && (
-                  <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-indigo-200 dark:border-indigo-900/60 shadow-md space-y-3">
-                    <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
-                      <div className="flex items-center gap-2">
+                  <div className="p-3.5 sm:p-4 bg-white dark:bg-slate-900 rounded-2xl border border-indigo-200 dark:border-indigo-900/60 shadow-md space-y-3 min-w-0">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-slate-100 dark:border-slate-800 pb-2.5">
+                      <div className="flex items-start sm:items-center gap-2 min-w-0 flex-1">
                         <button
                           type="button"
                           onClick={() => setInspectingPair(null)}
-                          className="p-1 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer shrink-0 mt-0.5 sm:mt-0"
+                          title="Back to conversation list"
+                          aria-label="Back to conversation list"
                         >
                           <ArrowLeftIcon className="w-4 h-4" />
                         </button>
-                        <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                          Direct Message Inspection: {inspectingPair.userA} ↔{" "}
-                          {inspectingPair.userB}
-                        </h4>
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800">
-                          Read-Only Moderation
-                        </span>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                              Direct Message Inspection:
+                            </h4>
+                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 shrink-0 font-medium">
+                              Read-Only Moderation
+                            </span>
+                          </div>
+                          <p className="text-xs text-slate-700 dark:text-slate-200 font-semibold break-all mt-1 flex flex-wrap items-center gap-1">
+                            <span>{inspectingPair.userA}</span>
+                            <span className="text-slate-400 font-normal">
+                              ↔
+                            </span>
+                            <span>{inspectingPair.userB}</span>
+                          </p>
+                        </div>
                       </div>
 
                       <button
                         type="button"
                         onClick={() => setInspectingPair(null)}
-                        className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                        className="self-end sm:self-center text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 shrink-0 px-2 py-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
                       >
                         Close
                       </button>
@@ -1007,21 +1019,21 @@ export function AdminModal({ isOpen, onClose }: AdminModalProps) {
                         No messages found between these users.
                       </div>
                     ) : (
-                      <div className="max-h-72 overflow-y-auto space-y-2 p-2 bg-slate-50 dark:bg-slate-950/50 rounded-xl">
+                      <div className="max-h-72 overflow-y-auto space-y-2 p-2 bg-slate-50 dark:bg-slate-950/50 rounded-xl min-w-0">
                         {inspectMessages.map((m) => (
                           <div
                             key={m.id}
-                            className="p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 text-xs"
+                            className="p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 text-xs min-w-0"
                           >
-                            <div className="flex items-center justify-between mb-1">
-                              <span className="font-semibold text-slate-800 dark:text-slate-200">
+                            <div className="flex flex-wrap items-center justify-between gap-1 mb-1">
+                              <span className="font-semibold text-slate-800 dark:text-slate-200 break-all">
                                 {m.sender_email}
                               </span>
-                              <span className="text-[10px] text-slate-400">
+                              <span className="text-[10px] text-slate-400 shrink-0">
                                 {new Date(m.created_at).toLocaleString()}
                               </span>
                             </div>
-                            <p className="text-slate-600 dark:text-slate-300 break-words">
+                            <p className="text-slate-600 dark:text-slate-300 break-words whitespace-pre-wrap">
                               {m.message}
                             </p>
                           </div>
@@ -1033,7 +1045,7 @@ export function AdminModal({ isOpen, onClose }: AdminModalProps) {
 
                 {/* Sub-tab 1: Direct Conversations */}
                 {convSubTab === "direct" && !inspectingPair && (
-                  <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+                  <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm min-w-0">
                     {isLoadingConversations ? (
                       <div className="p-12 text-center text-slate-400 flex flex-col items-center">
                         <Loader2Icon className="w-6 h-6 text-indigo-600 animate-spin mb-3" />
@@ -1046,71 +1058,121 @@ export function AdminModal({ isOpen, onClose }: AdminModalProps) {
                         No direct conversations found.
                       </div>
                     ) : (
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-left text-xs border-collapse">
-                          <thead>
-                            <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/40 text-slate-500 dark:text-slate-400 font-semibold">
-                              <th className="py-3 px-4">Participants</th>
-                              <th className="py-3 px-4">Total Messages</th>
-                              <th className="py-3 px-4">Last Activity</th>
-                              <th className="py-3 px-4 text-right">Action</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
-                            {filteredDirectConvs.map((dc, idx) => (
-                              <tr
-                                key={`${dc.user_a}-${dc.user_b}-${idx}`}
-                                className="hover:bg-slate-50/50 dark:hover:bg-slate-850/40 transition-colors"
-                              >
-                                <td className="py-3 px-4">
-                                  <div className="flex items-center gap-2">
-                                    <span className="font-semibold text-slate-800 dark:text-slate-200">
-                                      {dc.user_a}
-                                    </span>
-                                    <span className="text-slate-400">↔</span>
-                                    <span className="font-semibold text-slate-800 dark:text-slate-200">
-                                      {dc.user_b}
-                                    </span>
-                                  </div>
-                                </td>
+                      <>
+                        {/* Mobile Card List (Visible on screens < md) */}
+                        <div className="block md:hidden divide-y divide-slate-100 dark:divide-slate-800/60 p-2 sm:p-3 space-y-2">
+                          {filteredDirectConvs.map((dc, idx) => (
+                            <div
+                              key={`mobile-${dc.user_a}-${dc.user_b}-${idx}`}
+                              className="p-3 rounded-xl bg-slate-50/70 dark:bg-slate-950/40 border border-slate-200/60 dark:border-slate-800/60 space-y-2.5"
+                            >
+                              <div className="space-y-1 min-w-0">
+                                <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">
+                                  Participants
+                                </span>
+                                <div className="text-xs font-semibold text-slate-800 dark:text-slate-200 break-all flex flex-wrap items-center gap-1.5">
+                                  <span>{dc.user_a}</span>
+                                  <span className="text-slate-400 font-normal">
+                                    ↔
+                                  </span>
+                                  <span>{dc.user_b}</span>
+                                </div>
+                              </div>
 
-                                <td className="py-3 px-4 text-slate-600 dark:text-slate-400">
-                                  {dc.total_messages} msgs
-                                </td>
+                              <div className="flex items-center justify-between pt-1 border-t border-slate-200/40 dark:border-slate-800/40 text-[11px]">
+                                <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+                                  <span className="font-medium bg-slate-200/60 dark:bg-slate-800 px-2 py-0.5 rounded-md">
+                                    {dc.total_messages} msgs
+                                  </span>
+                                  <span>
+                                    {new Date(
+                                      dc.last_activity,
+                                    ).toLocaleDateString()}
+                                  </span>
+                                </div>
 
-                                <td className="py-3 px-4 text-slate-400 text-[11px]">
-                                  {new Date(
-                                    dc.last_activity,
-                                  ).toLocaleDateString()}
-                                </td>
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    handleInspectMessages(dc.user_a, dc.user_b)
+                                  }
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 border border-indigo-200/60 dark:border-indigo-800/60 transition-colors cursor-pointer shadow-2xs"
+                                >
+                                  <EyeIcon className="w-3.5 h-3.5" />
+                                  <span>Inspect</span>
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
 
-                                <td className="py-3 px-4 text-right">
-                                  <button
-                                    type="button"
-                                    onClick={() =>
-                                      handleInspectMessages(
-                                        dc.user_a,
-                                        dc.user_b,
-                                      )
-                                    }
-                                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 border border-indigo-200/60 dark:border-indigo-800/60 transition-colors cursor-pointer"
-                                  >
-                                    <EyeIcon className="w-3 h-3" />
-                                    <span>Inspect</span>
-                                  </button>
-                                </td>
+                        {/* Desktop Table (Visible on md and up) */}
+                        <div className="hidden md:block overflow-x-auto">
+                          <table className="w-full text-left text-xs border-collapse">
+                            <thead>
+                              <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/40 text-slate-500 dark:text-slate-400 font-semibold">
+                                <th className="py-3 px-4">Participants</th>
+                                <th className="py-3 px-4">Total Messages</th>
+                                <th className="py-3 px-4">Last Activity</th>
+                                <th className="py-3 px-4 text-right">Action</th>
                               </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
+                              {filteredDirectConvs.map((dc, idx) => (
+                                <tr
+                                  key={`${dc.user_a}-${dc.user_b}-${idx}`}
+                                  className="hover:bg-slate-50/50 dark:hover:bg-slate-850/40 transition-colors"
+                                >
+                                  <td className="py-3 px-4">
+                                    <div className="flex items-center gap-2">
+                                      <span className="font-semibold text-slate-800 dark:text-slate-200">
+                                        {dc.user_a}
+                                      </span>
+                                      <span className="text-slate-400">↔</span>
+                                      <span className="font-semibold text-slate-800 dark:text-slate-200">
+                                        {dc.user_b}
+                                      </span>
+                                    </div>
+                                  </td>
+
+                                  <td className="py-3 px-4 text-slate-600 dark:text-slate-400">
+                                    {dc.total_messages} msgs
+                                  </td>
+
+                                  <td className="py-3 px-4 text-slate-400 text-[11px]">
+                                    {new Date(
+                                      dc.last_activity,
+                                    ).toLocaleDateString()}
+                                  </td>
+
+                                  <td className="py-3 px-4 text-right">
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        handleInspectMessages(
+                                          dc.user_a,
+                                          dc.user_b,
+                                        )
+                                      }
+                                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 border border-indigo-200/60 dark:border-indigo-800/60 transition-colors cursor-pointer"
+                                    >
+                                      <EyeIcon className="w-3 h-3" />
+                                      <span>Inspect</span>
+                                    </button>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </>
                     )}
                   </div>
                 )}
 
                 {/* Sub-tab 2: Group Channels */}
                 {convSubTab === "groups" && !inspectingPair && (
-                  <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+                  <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm min-w-0">
                     {isLoadingConversations ? (
                       <div className="p-12 text-center text-slate-400 flex flex-col items-center">
                         <Loader2Icon className="w-6 h-6 text-indigo-600 animate-spin mb-3" />
@@ -1123,44 +1185,81 @@ export function AdminModal({ isOpen, onClose }: AdminModalProps) {
                         No group channels found.
                       </div>
                     ) : (
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-left text-xs border-collapse">
-                          <thead>
-                            <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/40 text-slate-500 dark:text-slate-400 font-semibold">
-                              <th className="py-3 px-4">Group Name</th>
-                              <th className="py-3 px-4">Creator</th>
-                              <th className="py-3 px-4">Members</th>
-                              <th className="py-3 px-4">Last Activity</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
-                            {filteredGroups.map((g) => (
-                              <tr
-                                key={g.group_id}
-                                className="hover:bg-slate-50/50 dark:hover:bg-slate-850/40 transition-colors"
-                              >
-                                <td className="py-3 px-4 font-semibold text-slate-900 dark:text-slate-100">
+                      <>
+                        {/* Mobile Card List (Visible on screens < md) */}
+                        <div className="block md:hidden divide-y divide-slate-100 dark:divide-slate-800/60 p-2 sm:p-3 space-y-2">
+                          {filteredGroups.map((g) => (
+                            <div
+                              key={`mobile-group-${g.group_id}`}
+                              className="p-3 rounded-xl bg-slate-50/70 dark:bg-slate-950/40 border border-slate-200/60 dark:border-slate-800/60 space-y-2"
+                            >
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="font-semibold text-xs text-slate-900 dark:text-slate-100 truncate">
                                   {g.name}
-                                </td>
-
-                                <td className="py-3 px-4 text-slate-600 dark:text-slate-400">
-                                  {g.creator_email}
-                                </td>
-
-                                <td className="py-3 px-4 text-slate-600 dark:text-slate-400">
+                                </span>
+                                <span className="text-[11px] font-medium bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 border border-indigo-200/60 dark:border-indigo-800/60 px-2 py-0.5 rounded-md shrink-0">
                                   {g.member_count} members
-                                </td>
+                                </span>
+                              </div>
 
-                                <td className="py-3 px-4 text-slate-400 text-[11px]">
+                              <div className="text-[11px] space-y-0.5">
+                                <div className="text-slate-500 dark:text-slate-400 break-all">
+                                  Creator:{" "}
+                                  <span className="text-slate-700 dark:text-slate-300 font-medium">
+                                    {g.creator_email}
+                                  </span>
+                                </div>
+                                <div className="text-slate-400 text-[10px]">
+                                  Last Activity:{" "}
                                   {new Date(
                                     g.last_activity,
                                   ).toLocaleDateString()}
-                                </td>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Desktop Table (Visible on md and up) */}
+                        <div className="hidden md:block overflow-x-auto">
+                          <table className="w-full text-left text-xs border-collapse">
+                            <thead>
+                              <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/40 text-slate-500 dark:text-slate-400 font-semibold">
+                                <th className="py-3 px-4">Group Name</th>
+                                <th className="py-3 px-4">Creator</th>
+                                <th className="py-3 px-4">Members</th>
+                                <th className="py-3 px-4">Last Activity</th>
                               </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
+                              {filteredGroups.map((g) => (
+                                <tr
+                                  key={g.group_id}
+                                  className="hover:bg-slate-50/50 dark:hover:bg-slate-850/40 transition-colors"
+                                >
+                                  <td className="py-3 px-4 font-semibold text-slate-900 dark:text-slate-100">
+                                    {g.name}
+                                  </td>
+
+                                  <td className="py-3 px-4 text-slate-600 dark:text-slate-400">
+                                    {g.creator_email}
+                                  </td>
+
+                                  <td className="py-3 px-4 text-slate-600 dark:text-slate-400">
+                                    {g.member_count} members
+                                  </td>
+
+                                  <td className="py-3 px-4 text-slate-400 text-[11px]">
+                                    {new Date(
+                                      g.last_activity,
+                                    ).toLocaleDateString()}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </>
                     )}
                   </div>
                 )}
