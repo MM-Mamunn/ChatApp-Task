@@ -26,6 +26,7 @@ import {
 import {
   ShieldIcon,
   UsersIcon,
+  UserIcon,
   MessageSquareIcon,
   ActivityIcon,
   SearchIcon,
@@ -423,25 +424,25 @@ export function AdminModal({ isOpen, onClose }: AdminModalProps) {
           {/* Top Header */}
           <div className="px-6 py-4 border-b border-border bg-muted/30 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-3">
-              <div className="size-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center border border-amber-500/20">
+              <div className="size-10 rounded-xl bg-amber-500/10 text-amber-700 dark:text-amber-300 flex items-center justify-center border border-amber-500/25 shadow-2xs">
                 <ShieldIcon className="size-5" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
                   <h2
                     id="admin-dialog-title"
-                    className="text-base font-bold text-foreground"
+                    className="text-base font-bold text-foreground tracking-tight"
                   >
                     Admin Oversight Console
                   </h2>
                   <Badge
                     variant="warning"
-                    className="text-[10px] py-0 px-2 font-bold tracking-wider uppercase"
+                    className="text-[10px] py-0 px-2 font-bold tracking-wider uppercase shadow-2xs"
                   >
                     Restricted
                   </Badge>
                 </div>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-muted-foreground mt-0.5">
                   Manage platform users, inspect activity logs, and monitor
                   conversations
                 </p>
@@ -648,10 +649,10 @@ export function AdminModal({ isOpen, onClose }: AdminModalProps) {
                                   variant={
                                     u.role === "admin" ? "warning" : "secondary"
                                   }
-                                  className="text-[10px] py-0 px-2 font-semibold uppercase tracking-wider gap-1"
+                                  className="text-[10px] py-0.5 px-2 font-semibold uppercase tracking-wider gap-1 shadow-2xs"
                                 >
                                   {u.role === "admin" && (
-                                    <ShieldIcon className="size-3 text-amber-500" />
+                                    <ShieldIcon className="size-3 text-amber-600 dark:text-amber-400" />
                                   )}
                                   <span>{u.role}</span>
                                 </Badge>
@@ -662,13 +663,13 @@ export function AdminModal({ isOpen, onClose }: AdminModalProps) {
                                   variant={
                                     u.is_active ? "success" : "destructive"
                                   }
-                                  className="text-[10px] py-0 px-2 font-medium gap-1.5"
+                                  className="text-[10px] py-0.5 px-2 font-medium gap-1.5 shadow-2xs"
                                 >
                                   <span
                                     className={`size-1.5 rounded-full ${
                                       u.is_active
-                                        ? "bg-emerald-500"
-                                        : "bg-rose-500"
+                                        ? "bg-emerald-500 ring-2 ring-emerald-500/30"
+                                        : "bg-rose-500 ring-2 ring-rose-500/30"
                                     }`}
                                   />
                                   <span>
@@ -687,8 +688,11 @@ export function AdminModal({ isOpen, onClose }: AdminModalProps) {
                                   <Button
                                     type="button"
                                     size="xs"
-                                    variant={
-                                      u.role === "admin" ? "outline" : "subtle"
+                                    variant="outline"
+                                    className={
+                                      u.role === "admin"
+                                        ? "hover:bg-muted text-muted-foreground hover:text-foreground"
+                                        : "hover:border-amber-500/40 hover:bg-amber-500/[0.08] hover:text-amber-800 dark:hover:text-amber-300"
                                     }
                                     disabled={isSelf || isActionLoading}
                                     onClick={() =>
@@ -710,9 +714,15 @@ export function AdminModal({ isOpen, onClose }: AdminModalProps) {
                                     {isActionLoading ? (
                                       <Loader2Icon className="size-3 animate-spin" />
                                     ) : u.role === "admin" ? (
-                                      "Demote to User"
+                                      <>
+                                        <UserIcon className="size-3 shrink-0" />
+                                        <span>Demote to User</span>
+                                      </>
                                     ) : (
-                                      "Promote to Admin"
+                                      <>
+                                        <ShieldIcon className="size-3 text-amber-600 dark:text-amber-400 shrink-0" />
+                                        <span>Promote to Admin</span>
+                                      </>
                                     )}
                                   </Button>
 
@@ -721,7 +731,9 @@ export function AdminModal({ isOpen, onClose }: AdminModalProps) {
                                     type="button"
                                     size="xs"
                                     variant={
-                                      u.is_active ? "destructive" : "secondary"
+                                      u.is_active
+                                        ? "destructive-subtle"
+                                        : "success-subtle"
                                     }
                                     disabled={isSelf || isActionLoading}
                                     onClick={() =>
@@ -738,9 +750,15 @@ export function AdminModal({ isOpen, onClose }: AdminModalProps) {
                                     {isActionLoading ? (
                                       <Loader2Icon className="size-3 animate-spin" />
                                     ) : u.is_active ? (
-                                      "Deactivate"
+                                      <>
+                                        <XIcon className="size-3 shrink-0" />
+                                        <span>Deactivate</span>
+                                      </>
                                     ) : (
-                                      "Activate"
+                                      <>
+                                        <CheckIcon className="size-3 shrink-0" />
+                                        <span>Activate</span>
+                                      </>
                                     )}
                                   </Button>
                                 </div>

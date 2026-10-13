@@ -5,6 +5,8 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   variant?:
     | "default"
     | "destructive"
+    | "destructive-subtle"
+    | "success-subtle"
     | "outline"
     | "secondary"
     | "ghost"
@@ -32,14 +34,18 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm active:scale-[0.98]",
       destructive:
         "bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-sm active:scale-[0.98]",
+      "destructive-subtle":
+        "border border-rose-200/80 bg-rose-50/70 text-rose-700 hover:bg-rose-100 hover:text-rose-800 dark:border-rose-900/60 dark:bg-rose-950/30 dark:text-rose-300 dark:hover:bg-rose-900/50 active:scale-[0.98]",
+      "success-subtle":
+        "border border-emerald-200/80 bg-emerald-50/70 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800 dark:border-emerald-900/60 dark:bg-emerald-950/30 dark:text-emerald-300 dark:hover:bg-emerald-900/50 active:scale-[0.98]",
       outline:
         "border border-border bg-background hover:bg-accent hover:text-accent-foreground active:scale-[0.98]",
       secondary:
-        "bg-secondary text-secondary-foreground hover:bg-secondary/80 active:scale-[0.98]",
+        "border border-border/60 bg-secondary text-secondary-foreground hover:bg-secondary/80 active:scale-[0.98]",
       ghost: "hover:bg-accent hover:text-accent-foreground",
       link: "text-primary underline-offset-4 hover:underline",
       subtle:
-        "bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950/60 dark:text-indigo-300 dark:hover:bg-indigo-900/60",
+        "border border-indigo-200/70 bg-indigo-50/80 text-indigo-700 hover:bg-indigo-100 dark:border-indigo-900/60 dark:bg-indigo-950/40 dark:text-indigo-300 dark:hover:bg-indigo-900/60 active:scale-[0.98]",
     }[variant];
 
     const sizeClasses = {

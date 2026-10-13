@@ -21,6 +21,7 @@ import {
   LogOutIcon,
   ShieldIcon,
   Loader2Icon,
+  ChevronRightIcon,
 } from "../ui/icons";
 import { ThemeToggle } from "../ui/theme-toggle";
 
@@ -180,18 +181,25 @@ export function Sidebar({
             type="button"
             onClick={onOpenAdmin}
             aria-label="Open Admin Console"
-            className="w-full flex items-center justify-between py-2 px-3 rounded-xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent hover:from-amber-500/20 hover:to-amber-500/10 border border-amber-500/25 text-amber-700 dark:text-amber-300 text-xs font-semibold transition-all cursor-pointer shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
+            className="w-full flex items-center justify-between py-2 px-2.5 rounded-xl bg-card hover:bg-amber-500/[0.06] dark:bg-card dark:hover:bg-amber-500/[0.1] border border-amber-500/30 hover:border-amber-500/50 text-foreground text-xs font-semibold transition-all cursor-pointer shadow-2xs group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
           >
-            <div className="flex items-center gap-2">
-              <ShieldIcon className="w-4 h-4 text-amber-500 shrink-0" />
-              <span>Admin Console</span>
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="size-6 rounded-lg bg-amber-500/15 text-amber-700 dark:text-amber-300 flex items-center justify-center shrink-0 border border-amber-500/25 group-hover:scale-105 group-hover:bg-amber-500/20 transition-all">
+                <ShieldIcon className="size-3.5" />
+              </div>
+              <span className="truncate group-hover:text-amber-800 dark:group-hover:text-amber-300 transition-colors">
+                Admin Console
+              </span>
             </div>
-            <Badge
-              variant="warning"
-              className="text-[10px] py-0 px-1.5 font-bold tracking-wider uppercase"
-            >
-              Admin
-            </Badge>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <Badge
+                variant="warning"
+                className="text-[10px] py-0 px-1.5 font-bold tracking-wider uppercase shadow-2xs"
+              >
+                Admin
+              </Badge>
+              <ChevronRightIcon className="size-3.5 text-muted-foreground/60 group-hover:text-amber-700 dark:group-hover:text-amber-300 group-hover:translate-x-0.5 transition-all" />
+            </div>
           </button>
         </div>
       )}

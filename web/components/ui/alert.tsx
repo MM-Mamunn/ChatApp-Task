@@ -12,9 +12,9 @@ export const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
       destructive:
         "border-destructive/30 bg-destructive/10 text-destructive dark:border-destructive/40",
       warning:
-        "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-400 dark:border-amber-500/40",
+        "border-amber-500/30 bg-amber-500/10 text-amber-900 dark:text-amber-200 dark:border-amber-500/40",
       success:
-        "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 dark:border-emerald-500/40",
+        "border-emerald-500/30 bg-emerald-500/10 text-emerald-900 dark:text-emerald-200 dark:border-emerald-500/40",
     }[variant];
 
     return (

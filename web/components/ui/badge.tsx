@@ -20,19 +20,19 @@ export function Badge({
 }: BadgeProps) {
   const variantClasses = {
     default:
-      "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
+      "border-transparent bg-primary text-primary-foreground shadow-2xs font-medium",
     secondary:
-      "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
+      "border-border/80 bg-secondary/70 text-secondary-foreground font-medium",
     destructive:
-      "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
-    outline: "text-foreground border-border",
+      "border-rose-200/80 bg-rose-50 text-rose-700 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-300 font-medium",
+    outline: "text-foreground border-border bg-background/50 font-medium",
     success:
-      "border-emerald-500/20 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400 dark:border-emerald-800/60",
+      "border-emerald-200/80 bg-emerald-50 text-emerald-800 dark:border-emerald-800/60 dark:bg-emerald-950/40 dark:text-emerald-300 font-medium",
     warning:
-      "border-amber-500/20 bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-400 dark:border-amber-800/60",
-    info: "border-sky-500/20 bg-sky-50 text-sky-700 dark:bg-sky-950/60 dark:text-sky-400 dark:border-sky-800/60",
+      "border-amber-200/80 bg-amber-50 text-amber-800 dark:border-amber-800/60 dark:bg-amber-950/40 dark:text-amber-300 font-medium",
+    info: "border-sky-200/80 bg-sky-50 text-sky-800 dark:border-sky-800/60 dark:bg-sky-950/40 dark:text-sky-300 font-medium",
     subtle:
-      "border-indigo-500/20 bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-400 dark:border-indigo-800/60",
+      "border-indigo-200/80 bg-indigo-50 text-indigo-800 dark:border-indigo-800/60 dark:bg-indigo-950/40 dark:text-indigo-300 font-medium",
   }[variant];
 
   return (
