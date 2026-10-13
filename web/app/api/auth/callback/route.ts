@@ -16,6 +16,34 @@ import { serializeRefreshTokenCookie } from "@/api/authentication/cookies";
  * 4. Serializes application's native HTTP-only refresh token cookie.
  * 5. Redirects the browser to /chat (or requested 'next' path) with session cookie attached.
  */
+/**
+ * Resolves the true external public origin.
+ * In serverless environments behind edge proxies (such as Vercel),
+ * request.url internally reflects the container listener (e.g. localhost:10000).
+ * We inspect proxy headers (x-forwarded-host, x-forwarded-proto) or public configuration
+ * to ensure redirects target the real public domain.
+ */
+function getPublicOrigin(request: NextRequest): string {
+  const forwardedHost = request.headers.get("x-forwarded-host");
+  const forwardedProto = request.headers.get("x-forwarded-proto") || "https";
+
+  if (forwardedHost) {
+    return `${forwardedProto}://${forwardedHost}`;
+  }
+
+  const host = request.headers.get("host");
+  if (host && !host.includes("localhost:10000")) {
+    const proto = request.headers.get("x-forwarded-proto") || "http";
+    return `${proto}://${host}`;
+  }
+
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return process.env.NEXT_PUBLIC_APP_URL.replace(/\/$/, "");
+  }
+
+  return request.nextUrl.origin;
+}
+
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
@@ -23,7 +51,7 @@ export async function GET(request: NextRequest) {
   const errorDescription = requestUrl.searchParams.get("error_description");
   const next = requestUrl.searchParams.get("next") || "/chat";
 
-  const origin = requestUrl.origin;
+  const origin = getPublicOrigin(request);
 
   // 1. Handle provider errors or user cancellation
   if (error) {
