@@ -2,12 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import {
-  MessageSquareIcon,
-  MenuIcon,
-  XIcon,
-  ChevronRightIcon,
-} from "../ui/icons";
+import { motion, AnimatePresence } from "framer-motion";
+import { MessageSquareIcon, MenuIcon, XIcon } from "../ui/icons";
 
 export function LandingNavbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -15,162 +11,132 @@ export function LandingNavbar() {
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      setIsScrolled(window.scrollY > 12);
     };
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const navLinks = [
+    { href: "#features", label: "Features" },
+    { href: "#experience", label: "Live Demo" },
+    { href: "#demo-accounts", label: "Try It" },
+  ];
+
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-200 ${
         isScrolled
-          ? "bg-slate-950/85 backdrop-blur-md border-b border-slate-800/80 shadow-lg shadow-black/25 py-3"
-          : "bg-transparent py-5"
+          ? "bg-[#09090b]/90 backdrop-blur-sm border-b border-white/[0.06]"
+          : "bg-transparent"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between">
-          {/* Logo Brand */}
+      <div className="max-w-6xl mx-auto px-5 sm:px-8">
+        <div className="flex items-center justify-between h-14">
+          {/* Logo */}
           <Link
             href="/"
-            className="flex items-center gap-3 group focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded-xl px-1"
+            className="flex items-center gap-2.5 group focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-lg"
+            aria-label="ChatApp home"
           >
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 via-sky-500 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/25 group-hover:scale-105 transition-transform">
-              <MessageSquareIcon className="w-5 h-5" />
+            <div className="size-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white group-hover:bg-indigo-500 transition-colors">
+              <MessageSquareIcon className="w-4 h-4" />
             </div>
-            <div>
-              <span className="text-base font-bold tracking-tight text-white flex items-center gap-2">
-                ChatApp
-                <span className="text-[10px] font-semibold tracking-wide px-2 py-0.5 rounded-full bg-indigo-950/90 text-indigo-300 border border-indigo-700/60">
-                  Realtime
-                </span>
-              </span>
-              <p className="text-[11px] text-slate-400 font-medium hidden sm:block">
-                Effortless Team Messaging
-              </p>
-            </div>
+            <span className="text-sm font-semibold text-white tracking-tight">
+              ChatApp
+            </span>
           </Link>
 
-          {/* Desktop Navigation */}
+          {/* Desktop nav */}
           <nav
-            aria-label="Main Navigation"
-            className="hidden md:flex items-center gap-1 bg-slate-900/70 border border-slate-800/80 rounded-full px-4 py-1.5 backdrop-blur-md"
+            aria-label="Main navigation"
+            className="hidden md:flex items-center gap-6"
           >
-            <a
-              href="#features"
-              className="px-3.5 py-1.5 text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800/60 rounded-full transition-colors"
-            >
-              Features
-            </a>
-            <a
-              href="#experience"
-              className="px-3.5 py-1.5 text-xs font-medium text-sky-300 hover:text-white hover:bg-sky-900/40 rounded-full transition-colors flex items-center gap-1.5"
-            >
-              <span>Interactive Preview</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse" />
-            </a>
-            <a
-              href="#why-chatapp"
-              className="px-3.5 py-1.5 text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800/60 rounded-full transition-colors"
-            >
-              Why ChatApp
-            </a>
-            <a
-              href="#demo-accounts"
-              className="px-3.5 py-1.5 text-xs font-medium text-amber-300 hover:text-white hover:bg-amber-900/40 rounded-full transition-colors"
-            >
-              Try Demo Accounts
-            </a>
+            {navLinks.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                className="text-sm text-slate-400 hover:text-white transition-colors"
+              >
+                {link.label}
+              </a>
+            ))}
           </nav>
 
-          {/* Right Action Buttons */}
-          <div className="hidden sm:flex items-center gap-3">
+          {/* Desktop actions */}
+          <div className="hidden md:flex items-center gap-3">
             <Link
               href="/login"
-              className="px-4 py-2 text-xs font-semibold text-slate-300 hover:text-white transition-colors"
+              className="text-sm text-slate-400 hover:text-white transition-colors"
             >
-              Sign In
+              Sign in
             </Link>
-
             <Link
               href="/chat"
-              className="px-4 py-2 text-xs font-semibold rounded-xl bg-gradient-to-r from-indigo-500 via-sky-500 to-indigo-600 hover:opacity-95 text-white shadow-md shadow-indigo-500/20 active:scale-95 transition-all flex items-center gap-1"
+              className="text-sm font-medium px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition-colors"
             >
-              <span>Open Chat</span>
-              <ChevronRightIcon className="w-3.5 h-3.5" />
+              Open Chat
             </Link>
           </div>
 
-          {/* Mobile menu trigger */}
+          {/* Mobile toggle */}
           <button
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+            className="md:hidden p-1.5 text-slate-400 hover:text-white rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
             aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={mobileMenuOpen}
           >
             {mobileMenuOpen ? (
-              <XIcon className="w-6 h-6" />
+              <XIcon className="w-5 h-5" />
             ) : (
-              <MenuIcon className="w-6 h-6" />
+              <MenuIcon className="w-5 h-5" />
             )}
           </button>
         </div>
       </div>
 
-      {/* Mobile Drawer */}
-      {mobileMenuOpen && (
-        <div className="md:hidden bg-slate-950/95 border-b border-slate-800 px-4 pt-3 pb-6 mt-3 space-y-3 backdrop-blur-xl">
-          <nav className="flex flex-col space-y-2">
-            <a
-              href="#features"
-              onClick={() => setMobileMenuOpen(false)}
-              className="px-3 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-900 rounded-lg"
-            >
-              Features
-            </a>
-            <a
-              href="#experience"
-              onClick={() => setMobileMenuOpen(false)}
-              className="px-3 py-2 text-sm font-medium text-sky-300 hover:text-white hover:bg-slate-900 rounded-lg flex items-center justify-between"
-            >
-              <span>Interactive Preview</span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-sky-950 text-sky-400 border border-sky-800">
-                Live
-              </span>
-            </a>
-            <a
-              href="#why-chatapp"
-              onClick={() => setMobileMenuOpen(false)}
-              className="px-3 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-900 rounded-lg"
-            >
-              Why ChatApp
-            </a>
-            <a
-              href="#demo-accounts"
-              onClick={() => setMobileMenuOpen(false)}
-              className="px-3 py-2 text-sm font-medium text-amber-300 hover:text-white hover:bg-slate-900 rounded-lg"
-            >
-              Try Demo Accounts
-            </a>
-          </nav>
-
-          <div className="pt-3 border-t border-slate-800/80 flex flex-col gap-2">
-            <Link
-              href="/login"
-              className="w-full py-2.5 text-center text-sm font-medium text-slate-200 bg-slate-900 rounded-xl"
-            >
-              Sign In
-            </Link>
-            <Link
-              href="/chat"
-              className="w-full py-2.5 text-center text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl shadow-md"
-            >
-              Open Chat
-            </Link>
-          </div>
-        </div>
-      )}
+      {/* Mobile menu */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.18 }}
+            className="md:hidden overflow-hidden bg-[#09090b] border-b border-white/[0.06]"
+          >
+            <nav className="px-5 pt-2 pb-5 flex flex-col gap-1">
+              {navLinks.map((link) => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="px-2 py-2 text-sm text-slate-300 hover:text-white rounded-md"
+                >
+                  {link.label}
+                </a>
+              ))}
+              <div className="mt-3 pt-3 border-t border-white/[0.06] flex flex-col gap-2">
+                <Link
+                  href="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full py-2 text-center text-sm text-slate-300 hover:text-white rounded-lg border border-white/10"
+                >
+                  Sign in
+                </Link>
+                <Link
+                  href="/chat"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full py-2 text-center text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg"
+                >
+                  Open Chat
+                </Link>
+              </div>
+            </nav>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 }
