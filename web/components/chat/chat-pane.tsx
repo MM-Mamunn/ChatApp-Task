@@ -24,6 +24,7 @@ import {
 } from "../ui/icons";
 import type { ActiveTarget } from "./sidebar";
 import { GroupMembersModal } from "./group-members-modal";
+import { ThemeToggle } from "../ui/theme-toggle";
 
 interface ChatPaneProps {
   activeTarget: ActiveTarget;
@@ -666,6 +667,10 @@ export function ChatPane({
               </div>
             </>
           )}
+        </div>
+
+        <div className="flex items-center gap-2">
+          <ThemeToggle variant="compact" />
         </div>
       </div>
 

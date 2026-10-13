@@ -37,6 +37,13 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('chatapp-theme');if(t==='dark'){document.documentElement.classList.add('dark')}else if(t==='light'){document.documentElement.classList.remove('dark')}}catch(e){}})()`,
+          }}
+        />
+      </head>
       <body suppressHydrationWarning className="min-h-full flex flex-col">
         <AppProviders>{children}</AppProviders>
       </body>

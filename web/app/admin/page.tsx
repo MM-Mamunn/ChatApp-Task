@@ -19,6 +19,7 @@ import {
   Loader2Icon,
   AlertTriangleIcon,
 } from "@/components/ui/icons";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 export default function AdminPage() {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -93,6 +94,7 @@ export default function AdminPage() {
         </Link>
 
         <div className="flex items-center gap-2">
+          <ThemeToggle variant="compact" />
           <ShieldIcon className="size-4 text-amber-500" />
           <Badge variant="warning" className="text-xs font-bold gap-1">
             <span>Admin Mode</span>

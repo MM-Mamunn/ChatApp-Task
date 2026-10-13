@@ -37,6 +37,7 @@ import {
   EyeIcon,
   ArrowLeftIcon,
 } from "../ui/icons";
+import { ThemeToggle } from "../ui/theme-toggle";
 
 interface AdminModalProps {
   isOpen: boolean;
@@ -447,16 +448,19 @@ export function AdminModal({ isOpen, onClose }: AdminModalProps) {
               </div>
             </div>
 
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={onClose}
-              title="Close Admin Console"
-              aria-label="Close Admin Console"
-            >
-              <XIcon className="size-5" />
-            </Button>
+            <div className="flex items-center gap-1.5">
+              <ThemeToggle variant="compact" />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={onClose}
+                title="Close Admin Console"
+                aria-label="Close Admin Console"
+              >
+                <XIcon className="size-5" />
+              </Button>
+            </div>
           </div>
 
           {/* Navigation Tabs Bar */}

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { AuthCard } from "@/components/auth/auth-card";
 import { ArrowLeftIcon } from "@/components/ui/icons";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 export default function LoginPage() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -44,6 +45,11 @@ export default function LoginPage() {
           <ArrowLeftIcon className="size-3.5" />
           <span>Back to Home</span>
         </Link>
+      </div>
+
+      {/* Top right theme toggle */}
+      <div className="absolute top-6 right-6 z-10">
+        <ThemeToggle />
       </div>
 
       <div className="relative z-10 w-full flex flex-col items-center">

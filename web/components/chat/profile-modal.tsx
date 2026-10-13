@@ -16,6 +16,7 @@ import {
   DialogFooter,
 } from "../ui/dialog";
 import { ShieldIcon, CheckIcon } from "../ui/icons";
+import { ThemeToggle } from "../ui/theme-toggle";
 
 interface ProfileModalProps {
   isOpen: boolean;
@@ -186,6 +187,19 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
               onChange={(e) => setAvatarUrl(e.target.value)}
               placeholder="https://example.com/avatar.jpg"
             />
+          </div>
+
+          {/* Theme Preference Setting */}
+          <div className="pt-3 border-t border-border flex items-center justify-between">
+            <div>
+              <p className="text-xs font-semibold text-foreground">
+                Theme Preference
+              </p>
+              <p className="text-[11px] text-muted-foreground">
+                Switch between Light and Dark interface
+              </p>
+            </div>
+            <ThemeToggle variant="pill" />
           </div>
 
           <DialogFooter className="mt-4 gap-2">

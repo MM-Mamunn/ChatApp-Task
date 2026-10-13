@@ -22,6 +22,7 @@ import {
   ShieldIcon,
   Loader2Icon,
 } from "../ui/icons";
+import { ThemeToggle } from "../ui/theme-toggle";
 
 export type ActiveTarget =
   | {
@@ -144,6 +145,7 @@ export function Sidebar({
         </button>
 
         <div className="flex items-center gap-1">
+          <ThemeToggle variant="compact" />
           {user?.role === "admin" && (
             <Button
               type="button"
