@@ -483,18 +483,17 @@ List endpoints for messages and activity logs utilize **timestamp cursor paginat
 
 ---
 
-#### `POST /api/auth/google`
-- **Purpose:** Completes Google OAuth login; provisions account and profile on first login.
+#### `GET /api/auth/callback`
+- **Purpose:** OAuth 2.0 PKCE authorization code exchange gateway for Supabase Auth Google provider.
 - **Access:** Public.
-- **Request Body:**
-  ```json
-  {
-    "id_token": "google-oauth-id-token"
-  }
-  ```
-- **Response (200 OK):** Standard user and `access_token` payload.
-- **Cookies Set:** `refresh_token` HTTP-only cookie.
-- **Errors:** `401 UNAUTHORIZED` (Invalid Google token).
+- **Query Parameters:**
+  - `code` (required): OAuth authorization code issued by Supabase GoTrue.
+  - `next` (optional): Path to redirect after session issuance (default: `/chat`).
+  - `error` (optional): Provider error code if user cancelled or failed authentication.
+  - `error_description` (optional): Human-readable error description.
+- **Response:** HTTP 302 Redirect to `/chat` (or `next`).
+- **Cookies Set:** `refresh_token=<token>; HttpOnly; Secure; SameSite=Lax; Path=/api/auth; Max-Age=604800`
+- **Errors:** HTTP 302 Redirect to `/login?error=<message>`.
 
 ---
 

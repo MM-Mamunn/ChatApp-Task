@@ -29,13 +29,19 @@ description: >-
 
 `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET`, `ADMIN_BOOTSTRAP_EMAIL` (bootstrap mechanism finalized in API contract / step 1.3+).
 
-## Implementation layout (when built)
+## Implementation layout
 
-- OAuth callbacks and token issuance: server modules under `web/lib/` + Route Handlers under `web/app/api/auth/` (exact tree per contract).
-- Session validation helper used by Route Handlers before domain logic.
-- Deactivated users must fail auth even with technically valid tokens once deactivation is implemented.
+- **Google OAuth:** Mediated via Supabase Auth PKCE gateway. Initiated via `signInWithGoogle()` in `web/lib/supabase-client.ts`, code exchanged in Route Handler `GET /web/app/api/auth/callback/route.ts` via `web/lib/supabase-server.ts`.
+- **Identity Resolution:** Atomic resolution in `web/api/services/auth.service.ts` (`resolveOAuthUser`):
+  - Strictly requires `emailConfirmedAt`.
+  - Non-destructive linking preserving existing bcrypt `password_hash` and `role`.
+  - Blocks deactivated users with 403 Forbidden.
+  - Provisions first-time users with `role: "user"`.
+  - Issues native JWT access tokens (HS256, 15m) and HTTP-only refresh tokens (7d).
+- **Session Validation:** Route Handlers protected via `withAuth` and `withRoles` in `web/api/middlewares/`.
+- Deactivated users fail auth even with technically valid tokens via live database checks in `withAuth`.
 
 ## Security
 
-- Refresh token rotation/storage design follows step 1.3 contract.
-- Invalidate or reject sessions on role change and deactivation per chosen mechanism (document in API contract).
+- Refresh token rotation/storage design follows SHA-256 hashed storage in `public.refresh_tokens` and HTTP-only cookies (`Path=/api/auth`).
+- Invalidate or reject sessions on role change and deactivation per live database verification.

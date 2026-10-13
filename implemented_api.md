@@ -17,6 +17,7 @@ Complete reference manual for all APIs implemented in the Chat Application acros
    - [POST /api/auth/refresh](#53-post-apiauthrefresh)
    - [POST /api/auth/logout](#54-post-apiauthlogout)
    - [POST /api/auth/bootstrap-admin](#55-post-apiauthbootstrap-admin)
+   - [GET /api/auth/callback](#56-get-apiauthcallback)
 6. [User Discovery & Profile Management](#6-user-discovery--profile-management)
    - [GET /api/users/me](#61-get-apiusersme)
    - [PATCH /api/users/me](#62-patch-apiusersme)
@@ -287,6 +288,31 @@ The seed script (`npm run db:seed`) provides authentic test accounts:
   - `403 FORBIDDEN`: An administrator already exists in the system.
 - **Database Impact:**
   - Inserts 1 row into `users` with `role: "admin"`.
+
+---
+
+### 5.6. `GET /api/auth/callback`
+- **Purpose:** OAuth 2.0 PKCE authorization code exchange gateway for Supabase Auth Google provider.
+- **Authentication:** Public OAuth redirect handler with PKCE code parameter.
+- **Query Parameters:**
+  - `code` (required): OAuth authorization code issued by Supabase GoTrue.
+  - `next` (optional): Path to redirect after session issuance (default: `/chat`).
+  - `error` (optional): Provider error code if user cancelled or failed authentication.
+  - `error_description` (optional): Human-readable error description.
+- **Workflow:**
+  1. Validates authorization code and provider error parameters.
+  2. Exchanges PKCE code for verified Supabase session using `@supabase/ssr` server cookie store.
+  3. Atomically resolves user in `public.users` via `resolveOAuthUser`:
+     - Verified Google email (`email_confirmed_at`) strictly enforced.
+     - Existing email/password accounts linked safely without touching bcrypt `password_hash` or role.
+     - Deactivated accounts blocked immediately with 403 Forbidden.
+     - First-time users provisioned with standard `user` role.
+  4. Generates application refresh token, hashes and stores it in `public.refresh_tokens`.
+  5. Serializes HTTP-only `refresh_token` cookie and issues 302 Redirect to `/chat` (or requested `next` path).
+- **Database Impact:**
+  - Reads `users`; links or inserts 1 row.
+  - Inserts 1 row into `refresh_tokens`.
+  - Inserts audit logs into `activity_logs` (`USER_REGISTER`, `USER_LINK_IDENTITY`, `USER_LOGIN`).
 
 ---
 

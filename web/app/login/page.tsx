@@ -53,7 +53,13 @@ export default function LoginPage() {
       </div>
 
       <div className="relative z-10 w-full flex flex-col items-center">
-        <AuthCard onSuccess={() => router.push("/chat")} />
+        <React.Suspense
+          fallback={
+            <div className="w-full max-w-md mx-auto h-[480px] rounded-2xl bg-card border border-border animate-pulse" />
+          }
+        >
+          <AuthCard onSuccess={() => router.push("/chat")} />
+        </React.Suspense>
       </div>
     </div>
   );

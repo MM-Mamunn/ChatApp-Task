@@ -370,3 +370,165 @@ export async function bootstrapAdmin(
     },
   };
 }
+
+export interface OAuthUserInput {
+  email: string;
+  name?: string | null;
+  avatarUrl?: string | null;
+  emailConfirmedAt?: string | null;
+}
+
+/**
+ * Resolves an authenticated Google OAuth user in the application database:
+ * - Rejects unverified email identities.
+ * - Links existing email/password accounts WITHOUT modifying their bcrypt passwordHash or role.
+ * - Rejects deactivated accounts immediately with 403 Forbidden.
+ * - Creates a new user record with standard 'user' role for first-time OAuth sign-ups.
+ * - Concurrency safe: recovers cleanly from race conditions on duplicate inserts.
+ * - Issues native application JWT access token and HTTP-only refresh token.
+ */
+export async function resolveOAuthUser(
+  input: OAuthUserInput,
+): Promise<AuthSessionResult> {
+  const db = getDb();
+  const normalizedEmail = input.email.toLowerCase().trim();
+
+  // 1. Ownership & Verification Guard
+  if (!input.emailConfirmedAt) {
+    throw new UnauthorizedError(
+      "Unverified email address cannot be authenticated. Please verify your email with Google.",
+    );
+  }
+
+  // 2. Query existing application user
+  const existing = await db
+    .select()
+    .from(users)
+    .where(eq(users.email, normalizedEmail))
+    .limit(1);
+
+  let resolvedUser: {
+    email: string;
+    name: string;
+    avatarUrl: string | null;
+    role: string;
+    isActive: boolean;
+  };
+
+  if (existing.length > 0) {
+    const current = existing[0];
+
+    // 3. Deactivation enforcement
+    if (!current.isActive) {
+      throw new ForbiddenError(
+        "Account has been deactivated. Contact an administrator.",
+      );
+    }
+
+    // 4. Safe Account Linking
+    // Preserve existing passwordHash and role intact.
+    // Update avatarUrl only if previously null and Google provides an avatar.
+    if (!current.avatarUrl && input.avatarUrl) {
+      await db
+        .update(users)
+        .set({
+          avatarUrl: input.avatarUrl,
+          updatedAt: new Date(),
+        })
+        .where(eq(users.email, normalizedEmail));
+      current.avatarUrl = input.avatarUrl;
+    }
+
+    resolvedUser = current;
+
+    // 5. Record identity linking audit log
+    await db.insert(activityLogs).values({
+      actorEmail: normalizedEmail,
+      action: "USER_LINK_IDENTITY",
+      targetType: "user",
+      targetId: normalizedEmail,
+      details: {
+        provider: "google",
+        linkedToExisting: true,
+      },
+    });
+  } else {
+    // 6. First-time registration via Google OAuth
+    const defaultName = input.name?.trim() || normalizedEmail.split("@")[0];
+
+    try {
+      await db.insert(users).values({
+        email: normalizedEmail,
+        passwordHash: null,
+        name: defaultName,
+        avatarUrl: input.avatarUrl || null,
+        role: "user",
+        isActive: true,
+      });
+
+      resolvedUser = {
+        email: normalizedEmail,
+        name: defaultName,
+        avatarUrl: input.avatarUrl || null,
+        role: "user",
+        isActive: true,
+      };
+
+      await db.insert(activityLogs).values({
+        actorEmail: normalizedEmail,
+        action: "USER_REGISTER",
+        targetType: "user",
+        targetId: normalizedEmail,
+        details: { method: "google_oauth" },
+      });
+    } catch {
+      // Handle potential concurrent insert race condition gracefully
+      const retryFound = await db
+        .select()
+        .from(users)
+        .where(eq(users.email, normalizedEmail))
+        .limit(1);
+
+      if (retryFound.length > 0) {
+        resolvedUser = retryFound[0];
+      } else {
+        throw new ConflictError("Failed to register user due to a conflict");
+      }
+    }
+  }
+
+  // 7. Issue application session tokens
+  const rawRefreshToken = generateOpaqueRefreshToken();
+  const tokenHash = hashToken(rawRefreshToken);
+  const expiresAt = new Date(Date.now() + REFRESH_TOKEN_TTL_SECONDS * 1000);
+
+  await db.insert(refreshTokens).values({
+    userEmail: resolvedUser.email,
+    tokenHash,
+    expiresAt,
+  });
+
+  const accessToken = await createAccessToken({
+    sub: resolvedUser.email,
+    role: resolvedUser.role as "user" | "admin",
+  });
+
+  await db.insert(activityLogs).values({
+    actorEmail: resolvedUser.email,
+    action: "USER_LOGIN",
+    targetType: "user",
+    targetId: resolvedUser.email,
+    details: { method: "google_oauth" },
+  });
+
+  return {
+    user: {
+      email: resolvedUser.email,
+      name: resolvedUser.name,
+      avatar_url: resolvedUser.avatarUrl,
+      role: resolvedUser.role as "user" | "admin",
+    },
+    access_token: accessToken,
+    raw_refresh_token: rawRefreshToken,
+  };
+}

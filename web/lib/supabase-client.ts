@@ -7,7 +7,8 @@
  * - All message creation, mutations, and authentication remain strictly guarded by
  *   our Next.js API route handlers (/api) and server-side RBAC.
  */
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { createBrowserClient } from "@supabase/ssr";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { publicEnv } from "./env/public";
 
 let supabaseInstance: SupabaseClient | null = null;
@@ -28,12 +29,7 @@ export function getSupabaseClient(): SupabaseClient | null {
     return null;
   }
 
-  supabaseInstance = createClient(url, key, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-      detectSessionInUrl: false,
-    },
+  supabaseInstance = createBrowserClient(url, key, {
     realtime: {
       params: {
         eventsPerSecond: 10,
@@ -42,4 +38,31 @@ export function getSupabaseClient(): SupabaseClient | null {
   });
 
   return supabaseInstance;
+}
+
+/**
+ * Initiates Google OAuth 2.0 PKCE handshake via Supabase Auth.
+ * The browser client stores the PKCE code_verifier in an HTTP cookie,
+ * which is subsequently read by the server Route Handler during exchange.
+ */
+export async function signInWithGoogle(redirectTo?: string) {
+  const supabase = getSupabaseClient();
+  if (!supabase) {
+    throw new Error("Supabase client is not initialized");
+  }
+
+  const targetOrigin =
+    typeof window !== "undefined" ? window.location.origin : "";
+  const callbackUrl = redirectTo || `${targetOrigin}/api/auth/callback`;
+
+  return supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: callbackUrl,
+      queryParams: {
+        access_type: "offline",
+        prompt: "select_account",
+      },
+    },
+  });
 }

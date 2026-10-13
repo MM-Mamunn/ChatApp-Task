@@ -110,7 +110,7 @@ npm run dev
 
 ## Features
 
-- **Authentication & Sessions**: Email/password authentication with bcrypt password hashing (cost factor 12) and JWT sessions using `jose`. Short-lived access tokens (15m) paired with secure HTTP-only refresh tokens (7d) stored as SHA-256 hashes with automatic rotation and revocation on logout.
+- **Authentication & Sessions**: Google OAuth (via Supabase PKCE gateway with automatic account linking and profile creation) alongside email/password authentication with bcrypt password hashing (cost factor 12) and JWT sessions using `jose`. Short-lived access tokens (15m) paired with secure HTTP-only refresh tokens (7d) stored as SHA-256 hashes with automatic rotation and revocation on logout.
 - **Server-Side Authorization (RBAC)**: Strictly enforced server-side role-based access control with `user` and `admin` roles. No client-side self-promotion. Deactivated accounts have active sessions revoked immediately.
 - **Realtime Direct & Group Messaging**: 1-on-1 direct conversations (duplicate-safe initiation) and multi-member named group channels. Instant message delivery powered by Supabase Realtime over WebSockets—zero polling required.
 - **Responsive & Accessible UI**: Clean desktop and mobile responsive interface built with Tailwind CSS v4, Framer Motion animations, accessible keyboard navigation, visible focus indicators, and ARIA attributes across all modals and inputs (WCAG 2.1 AA compliant).
@@ -267,6 +267,7 @@ npm run test:auth       # Bcrypt cost 12, JWT access tokens, refresh rotation, l
 npm run test:rbac       # RBAC permission matrix, user search masking, role changes, deactivation
 npm run test:chat       # Direct chats, groups, message pagination, membership checks
 npm run test:members    # Group members management, creator-only add checks, duplicate guards
+npm run test:oauth      # Google OAuth resolution, account linking, password preservation, deactivation
 npm run test:login      # Login error formats (401, 400), bcrypt storage, test account verification
 npm run test:realtime   # Live Supabase Realtime WebSocket message push verification
 

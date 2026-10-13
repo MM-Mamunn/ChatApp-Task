@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/lib/auth-context";
 import { formatHttpStatus } from "@/lib/api-client";
@@ -17,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
+import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
 import {
   MessageSquareIcon,
   ShieldIcon,
@@ -38,6 +40,7 @@ interface AuthErrorState {
 
 export function AuthCard({ onSuccess }: AuthCardProps) {
   const { login, register } = useAuth();
+  const searchParams = useSearchParams();
   const [mode, setMode] = useState<"login" | "register">("login");
 
   // Form fields
@@ -49,10 +52,34 @@ export function AuthCard({ onSuccess }: AuthCardProps) {
   // Status
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [authError, setAuthError] = useState<AuthErrorState | null>(null);
+  const [dismissedUrlError, setDismissedUrlError] = useState(false);
+
+  // Derive OAuth error from URL search params (e.g. /login?error=oauth_cancelled) without cascading render
+  const errorParam = searchParams.get("error");
+  const urlOAuthError: AuthErrorState | null =
+    errorParam && !dismissedUrlError
+      ? {
+          statusText: "OAuth Notice",
+          message:
+            {
+              oauth_cancelled: "Google sign-in was cancelled.",
+              missing_code: "OAuth authorization code was missing.",
+              oauth_exchange_failed:
+                "Failed to verify credentials with Google.",
+            }[errorParam] || decodeURIComponent(errorParam),
+        }
+      : null;
+
+  const currentError = authError || urlOAuthError;
+
+  const clearErrors = () => {
+    setAuthError(null);
+    setDismissedUrlError(true);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setAuthError(null);
+    clearErrors();
 
     // Client-side validation with explicit 400 status formatting
     if (!email.trim() || !password) {
@@ -174,14 +201,14 @@ export function AuthCard({ onSuccess }: AuthCardProps) {
     setEmail(accountEmail);
     setPassword(accountPass);
     if (accountName) setName(accountName);
-    setAuthError(null);
+    clearErrors();
   };
 
   return (
     <div className="w-full max-w-md mx-auto">
       <Card className="border-border bg-card shadow-2xl backdrop-blur-xl">
         {/* Brand header */}
-        <CardHeader className="space-y-3 pb-6">
+        <CardHeader className="space-y-3 pb-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="size-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-sky-500 flex items-center justify-center text-white shadow-md shadow-indigo-500/25">
@@ -203,12 +230,84 @@ export function AuthCard({ onSuccess }: AuthCardProps) {
               v1.0
             </Badge>
           </div>
+        </CardHeader>
+
+        <CardContent className="space-y-4">
+          {/* Error notification using shadcn Alert */}
+          <AnimatePresence>
+            {currentError && (
+              <motion.div
+                key="auth-error-banner"
+                initial={{ opacity: 0, y: -6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.2 }}
+              >
+                <Alert variant="destructive" className="mb-2">
+                  <AlertTriangleIcon className="size-4" />
+                  <div className="space-y-1">
+                    {currentError.statusText && (
+                      <div className="flex items-center gap-1.5">
+                        <Badge
+                          variant="destructive"
+                          className="text-[10px] font-mono px-1.5 py-0"
+                        >
+                          {currentError.statusText}
+                        </Badge>
+                      </div>
+                    )}
+                    <AlertTitle className="text-xs font-medium">
+                      {currentError.message}
+                    </AlertTitle>
+                    {currentError.details &&
+                      currentError.details.length > 0 && (
+                        <AlertDescription>
+                          <ul className="text-[11px] list-disc list-inside space-y-0.5 pt-0.5">
+                            {currentError.details.map((detail, idx) => (
+                              <li key={idx}>
+                                {detail.field ? (
+                                  <span className="font-semibold">
+                                    {detail.field}:{" "}
+                                  </span>
+                                ) : null}
+                                {detail.issue}
+                              </li>
+                            ))}
+                          </ul>
+                        </AlertDescription>
+                      )}
+                  </div>
+                </Alert>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Google OAuth action */}
+          <GoogleSignInButton
+            disabled={isSubmitting}
+            onError={(msg) =>
+              setAuthError({
+                statusText: "OAuth Error",
+                message: msg,
+              })
+            }
+          />
+
+          {/* Visual Divider */}
+          <div className="relative flex items-center justify-center my-3">
+            <div className="absolute inset-0 flex items-center">
+              <Separator />
+            </div>
+            <span className="relative bg-card px-2 text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
+              or continue with email
+            </span>
+          </div>
 
           {/* Mode switch tabs */}
           <div
             role="tablist"
             aria-label="Authentication mode"
-            className="grid grid-cols-2 p-1 bg-muted rounded-xl text-sm font-medium mt-2"
+            className="grid grid-cols-2 p-1 bg-muted rounded-xl text-sm font-medium"
           >
             <button
               type="button"
@@ -216,7 +315,7 @@ export function AuthCard({ onSuccess }: AuthCardProps) {
               aria-selected={mode === "login"}
               onClick={() => {
                 setMode("login");
-                setAuthError(null);
+                clearErrors();
               }}
               className={`py-2 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                 mode === "login"
@@ -232,7 +331,7 @@ export function AuthCard({ onSuccess }: AuthCardProps) {
               aria-selected={mode === "register"}
               onClick={() => {
                 setMode("register");
-                setAuthError(null);
+                clearErrors();
               }}
               className={`py-2 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                 mode === "register"
@@ -243,56 +342,6 @@ export function AuthCard({ onSuccess }: AuthCardProps) {
               Create account
             </button>
           </div>
-        </CardHeader>
-
-        <CardContent className="space-y-4">
-          {/* Error notification using shadcn Alert */}
-          <AnimatePresence>
-            {authError && (
-              <motion.div
-                key="auth-error-banner"
-                initial={{ opacity: 0, y: -6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.2 }}
-              >
-                <Alert variant="destructive" className="mb-2">
-                  <AlertTriangleIcon className="size-4" />
-                  <div className="space-y-1">
-                    {authError.statusText && (
-                      <div className="flex items-center gap-1.5">
-                        <Badge
-                          variant="destructive"
-                          className="text-[10px] font-mono px-1.5 py-0"
-                        >
-                          {authError.statusText}
-                        </Badge>
-                      </div>
-                    )}
-                    <AlertTitle className="text-xs font-medium">
-                      {authError.message}
-                    </AlertTitle>
-                    {authError.details && authError.details.length > 0 && (
-                      <AlertDescription>
-                        <ul className="text-[11px] list-disc list-inside space-y-0.5 pt-0.5">
-                          {authError.details.map((detail, idx) => (
-                            <li key={idx}>
-                              {detail.field ? (
-                                <span className="font-semibold">
-                                  {detail.field}:{" "}
-                                </span>
-                              ) : null}
-                              {detail.issue}
-                            </li>
-                          ))}
-                        </ul>
-                      </AlertDescription>
-                    )}
-                  </div>
-                </Alert>
-              </motion.div>
-            )}
-          </AnimatePresence>
 
           {/* Form */}
           <form onSubmit={handleSubmit} noValidate className="space-y-3.5">

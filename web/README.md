@@ -44,6 +44,7 @@ Open [http://localhost:3000](http://localhost:3000).
 | `npm run test:rbac`     | Tests role-based authorization matrix and admin oversight                |
 | `npm run test:chat`     | Tests direct and group chat endpoints and message pagination             |
 | `npm run test:members`  | Tests group members listing, creator authorization, and duplicate guards |
+| `npm run test:oauth`    | Tests Google OAuth identity resolution, account linking, and security    |
 | `npm run test:realtime` | Tests Supabase Realtime WebSocket message push delivery                  |
 | `npm run db:generate`   | Generates Drizzle Kit schema migrations                                  |
 | `npm run db:migrate`    | Applies migrations to PostgreSQL database                                |
