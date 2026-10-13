@@ -11,6 +11,18 @@ import {
   type AdminDirectMessageItem,
 } from "@/lib/api-client";
 import { Avatar } from "../ui/avatar";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Alert, AlertDescription } from "../ui/alert";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from "../ui/table";
 import {
   ShieldIcon,
   UsersIcon,
@@ -396,7 +408,7 @@ export function AdminModal({ isOpen, onClose }: AdminModalProps) {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 md:p-6 bg-slate-950/70 backdrop-blur-md">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 md:p-6 bg-black/60 backdrop-blur-sm">
         <motion.div
           role="dialog"
           aria-modal="true"
@@ -405,131 +417,130 @@ export function AdminModal({ isOpen, onClose }: AdminModalProps) {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.96, y: 12 }}
           transition={{ duration: 0.2 }}
-          className="relative w-full max-w-5xl h-[88vh] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col overflow-hidden text-slate-800 dark:text-slate-100"
+          className="relative w-full max-w-5xl h-[88vh] bg-card text-card-foreground rounded-2xl shadow-2xl border border-border flex flex-col overflow-hidden"
         >
           {/* Top Header */}
-          <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-950/40 flex items-center justify-between shrink-0">
+          <div className="px-6 py-4 border-b border-border bg-muted/30 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center ring-1 ring-amber-500/20">
-                <ShieldIcon className="w-5 h-5" />
+              <div className="size-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center border border-amber-500/20">
+                <ShieldIcon className="size-5" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
                   <h2
                     id="admin-dialog-title"
-                    className="text-base font-bold text-slate-900 dark:text-slate-100"
+                    className="text-base font-bold text-foreground"
                   >
                     Admin Oversight Console
                   </h2>
-                  <span className="px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded-md bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+                  <Badge
+                    variant="warning"
+                    className="text-[10px] py-0 px-2 font-bold tracking-wider uppercase"
+                  >
                     Restricted
-                  </span>
+                  </Badge>
                 </div>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
+                <p className="text-xs text-muted-foreground">
                   Manage platform users, inspect activity logs, and monitor
                   conversations
                 </p>
               </div>
             </div>
 
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="icon"
               onClick={onClose}
-              className="p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
               title="Close Admin Console"
               aria-label="Close Admin Console"
             >
-              <XIcon className="w-5 h-5" />
-            </button>
+              <XIcon className="size-5" />
+            </Button>
           </div>
 
           {/* Navigation Tabs Bar */}
           <div
             role="tablist"
             aria-label="Admin console navigation"
-            className="px-3 sm:px-6 pt-3 pb-2 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center gap-1.5 sm:gap-2 shrink-0 overflow-x-auto scrollbar-none"
+            className="px-3 sm:px-6 pt-3 pb-2 border-b border-border bg-background flex items-center gap-1.5 sm:gap-2 shrink-0 overflow-x-auto scrollbar-none"
           >
-            <button
+            <Button
               type="button"
               role="tab"
               aria-selected={activeTab === "users"}
+              variant={activeTab === "users" ? "default" : "ghost"}
+              size="sm"
               onClick={() => {
                 setActiveTab("users");
                 if (usersList.length === 0) fetchUsers();
               }}
-              className={`flex items-center gap-2 px-3 sm:px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer shrink-0 whitespace-nowrap ${
-                activeTab === "users"
-                  ? "bg-indigo-600 text-white shadow-sm shadow-indigo-600/20"
-                  : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
-              }`}
+              className="gap-2 shrink-0 whitespace-nowrap"
             >
-              <UsersIcon className="w-3.5 h-3.5" />
+              <UsersIcon className="size-3.5" />
               <span>User Management</span>
               <span
                 className={`ml-1 px-1.5 py-0.2 rounded-full text-[10px] ${
                   activeTab === "users"
-                    ? "bg-indigo-500/50 text-white"
-                    : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
+                    ? "bg-primary-foreground/20 text-primary-foreground"
+                    : "bg-muted text-muted-foreground"
                 }`}
               >
                 {usersList.length}
               </span>
-            </button>
+            </Button>
 
-            <button
+            <Button
               type="button"
               role="tab"
               aria-selected={activeTab === "activity"}
+              variant={activeTab === "activity" ? "default" : "ghost"}
+              size="sm"
               onClick={() => {
                 setActiveTab("activity");
                 if (activities.length === 0) fetchActivity(actionFilter);
               }}
-              className={`flex items-center gap-2 px-3 sm:px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer shrink-0 whitespace-nowrap ${
-                activeTab === "activity"
-                  ? "bg-indigo-600 text-white shadow-sm shadow-indigo-600/20"
-                  : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
-              }`}
+              className="gap-2 shrink-0 whitespace-nowrap"
             >
-              <ActivityIcon className="w-3.5 h-3.5" />
+              <ActivityIcon className="size-3.5" />
               <span>Activity Audit Trail</span>
-            </button>
+            </Button>
 
-            <button
+            <Button
               type="button"
               role="tab"
               aria-selected={activeTab === "conversations"}
+              variant={activeTab === "conversations" ? "default" : "ghost"}
+              size="sm"
               onClick={() => {
                 setActiveTab("conversations");
                 if (!conversationsOverview) fetchConversations();
               }}
-              className={`flex items-center gap-2 px-3 sm:px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer shrink-0 whitespace-nowrap ${
-                activeTab === "conversations"
-                  ? "bg-indigo-600 text-white shadow-sm shadow-indigo-600/20"
-                  : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
-              }`}
+              className="gap-2 shrink-0 whitespace-nowrap"
             >
-              <MessageSquareIcon className="w-3.5 h-3.5" />
+              <MessageSquareIcon className="size-3.5" />
               <span>Conversations Oversight</span>
-            </button>
+            </Button>
 
             <div className="ml-auto flex items-center gap-2 shrink-0">
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon"
                 onClick={() => {
                   if (activeTab === "users") fetchUsers();
                   if (activeTab === "activity") fetchActivity(actionFilter);
                   if (activeTab === "conversations") fetchConversations();
                 }}
                 title="Refresh current tab data"
-                className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
               >
-                <RefreshCwIcon className="w-3.5 h-3.5" />
-              </button>
+                <RefreshCwIcon className="size-3.5" />
+              </Button>
             </div>
           </div>
 
           {/* Modal Tab Content Area */}
-          <div className="flex-1 overflow-y-auto overflow-x-hidden p-3.5 sm:p-6 bg-slate-50/50 dark:bg-slate-950/20 min-w-0">
+          <div className="flex-1 overflow-y-auto overflow-x-hidden p-3.5 sm:p-6 bg-muted/20 min-w-0">
             {/* ========================================================== */}
             {/* TAB 1: USERS & RBAC                                        */}
             {/* ========================================================== */}
@@ -538,211 +549,203 @@ export function AdminModal({ isOpen, onClose }: AdminModalProps) {
                 {/* Search Bar & Feedback */}
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
                   <div className="relative flex-1 max-w-sm">
-                    <SearchIcon className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                    <input
+                    <SearchIcon className="size-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+                    <Input
                       type="text"
                       value={userSearchQuery}
                       onChange={(e) => setUserSearchQuery(e.target.value)}
                       placeholder="Filter by name or email..."
-                      className="w-full pl-9 pr-3 py-1.5 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                      className="pl-9 h-9"
                     />
                   </div>
 
                   {userFeedback && (
-                    <div
-                      className={`text-xs px-3 py-1.5 rounded-xl border flex items-center gap-2 ${
+                    <Alert
+                      variant={
                         userFeedback.type === "success"
-                          ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800"
-                          : "bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800"
-                      }`}
+                          ? "success"
+                          : "destructive"
+                      }
+                      className="py-1.5 px-3 flex items-center gap-2 max-w-md"
                     >
                       {userFeedback.type === "success" ? (
-                        <CheckIcon className="w-3.5 h-3.5 shrink-0" />
+                        <CheckIcon className="size-3.5 shrink-0 text-emerald-600 dark:text-emerald-400" />
                       ) : (
-                        <AlertTriangleIcon className="w-3.5 h-3.5 shrink-0" />
+                        <AlertTriangleIcon className="size-3.5 shrink-0" />
                       )}
-                      <span>{userFeedback.message}</span>
-                    </div>
+                      <AlertDescription className="text-xs">
+                        {userFeedback.message}
+                      </AlertDescription>
+                    </Alert>
                   )}
                 </div>
 
                 {/* Users Table */}
-                <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+                <div className="bg-card rounded-2xl border border-border overflow-hidden shadow-xs">
                   {isLoadingUsers ? (
-                    <div className="p-12 text-center text-slate-400 flex flex-col items-center">
-                      <Loader2Icon className="w-6 h-6 text-indigo-600 animate-spin mb-3" />
+                    <div className="p-12 text-center text-muted-foreground flex flex-col items-center">
+                      <Loader2Icon className="size-6 text-primary animate-spin mb-3" />
                       <span className="text-xs">
                         Loading registered users...
                       </span>
                     </div>
                   ) : filteredUsers.length === 0 ? (
-                    <div className="p-12 text-center text-slate-400">
+                    <div className="p-12 text-center text-muted-foreground">
                       <p className="text-xs">No users match your search.</p>
                     </div>
                   ) : (
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-left text-xs border-collapse">
-                        <thead>
-                          <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/40 text-slate-500 dark:text-slate-400 font-semibold">
-                            <th className="py-3 px-4">User</th>
-                            <th className="py-3 px-4">Role</th>
-                            <th className="py-3 px-4">Status</th>
-                            <th className="py-3 px-4">Created</th>
-                            <th className="py-3 px-4 text-right">Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
-                          {filteredUsers.map((u) => {
-                            const isSelf =
-                              u.email.toLowerCase() ===
-                              currentUser?.email.toLowerCase();
-                            const isActionLoading =
-                              actionLoadingEmail?.toLowerCase() ===
-                              u.email.toLowerCase();
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-[300px]">User</TableHead>
+                          <TableHead>Role</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Created</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredUsers.map((u) => {
+                          const isSelf =
+                            u.email.toLowerCase() ===
+                            currentUser?.email.toLowerCase();
+                          const isActionLoading =
+                            actionLoadingEmail?.toLowerCase() ===
+                            u.email.toLowerCase();
 
-                            return (
-                              <tr
-                                key={u.email}
-                                className="hover:bg-slate-50/50 dark:hover:bg-slate-850/40 transition-colors"
-                              >
-                                <td className="py-3 px-4">
-                                  <div className="flex items-center gap-3">
-                                    <Avatar
-                                      name={u.name}
-                                      email={u.email}
-                                      avatarUrl={u.avatar_url}
-                                      size="sm"
-                                    />
-                                    <div className="min-w-0">
-                                      <div className="font-semibold text-slate-900 dark:text-slate-100 truncate">
-                                        {u.name || "Nameless User"}
-                                        {isSelf && (
-                                          <span className="ml-1.5 text-[10px] text-indigo-600 dark:text-indigo-400 font-normal">
-                                            (You)
-                                          </span>
-                                        )}
-                                      </div>
-                                      <div className="text-[11px] text-slate-400 truncate">
-                                        {u.email}
-                                      </div>
+                          return (
+                            <TableRow key={u.email}>
+                              <TableCell>
+                                <div className="flex items-center gap-3">
+                                  <Avatar
+                                    name={u.name}
+                                    email={u.email}
+                                    avatarUrl={u.avatar_url}
+                                    size="sm"
+                                  />
+                                  <div className="min-w-0">
+                                    <div className="font-semibold text-foreground truncate">
+                                      {u.name || "Nameless User"}
+                                      {isSelf && (
+                                        <span className="ml-1.5 text-[10px] text-primary font-normal">
+                                          (You)
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div className="text-[11px] text-muted-foreground truncate">
+                                      {u.email}
                                     </div>
                                   </div>
-                                </td>
+                                </div>
+                              </TableCell>
 
-                                <td className="py-3 px-4">
-                                  <span
-                                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider ${
-                                      u.role === "admin"
-                                        ? "bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800"
-                                        : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
-                                    }`}
-                                  >
-                                    {u.role === "admin" && (
-                                      <ShieldIcon className="w-3 h-3 text-amber-500" />
-                                    )}
-                                    {u.role}
-                                  </span>
-                                </td>
+                              <TableCell>
+                                <Badge
+                                  variant={
+                                    u.role === "admin" ? "warning" : "secondary"
+                                  }
+                                  className="text-[10px] py-0 px-2 font-semibold uppercase tracking-wider gap-1"
+                                >
+                                  {u.role === "admin" && (
+                                    <ShieldIcon className="size-3 text-amber-500" />
+                                  )}
+                                  <span>{u.role}</span>
+                                </Badge>
+                              </TableCell>
 
-                                <td className="py-3 px-4">
+                              <TableCell>
+                                <Badge
+                                  variant={
+                                    u.is_active ? "success" : "destructive"
+                                  }
+                                  className="text-[10px] py-0 px-2 font-medium gap-1.5"
+                                >
                                   <span
-                                    className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium ${
+                                    className={`size-1.5 rounded-full ${
                                       u.is_active
-                                        ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400"
-                                        : "bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400"
+                                        ? "bg-emerald-500"
+                                        : "bg-rose-500"
                                     }`}
-                                  >
-                                    <span
-                                      className={`w-1.5 h-1.5 rounded-full ${
-                                        u.is_active
-                                          ? "bg-emerald-500"
-                                          : "bg-rose-500"
-                                      }`}
-                                    />
+                                  />
+                                  <span>
                                     {u.is_active ? "Active" : "Deactivated"}
                                   </span>
-                                </td>
+                                </Badge>
+                              </TableCell>
 
-                                <td className="py-3 px-4 text-slate-400 text-[11px]">
-                                  {new Date(u.created_at).toLocaleDateString()}
-                                </td>
+                              <TableCell className="text-muted-foreground text-[11px]">
+                                {new Date(u.created_at).toLocaleDateString()}
+                              </TableCell>
 
-                                <td className="py-3 px-4 text-right">
-                                  <div className="inline-flex items-center gap-2 justify-end">
-                                    {/* Role toggle button */}
-                                    <button
-                                      type="button"
-                                      disabled={isSelf || isActionLoading}
-                                      onClick={() =>
-                                        handleRoleChange(
-                                          u.email,
-                                          u.role === "admin" ? "user" : "admin",
-                                        )
-                                      }
-                                      title={
-                                        isSelf
-                                          ? "Cannot alter your own role"
-                                          : `Change to ${
-                                              u.role === "admin"
-                                                ? "User"
-                                                : "Admin"
-                                            }`
-                                      }
-                                      className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all ${
-                                        isSelf
-                                          ? "opacity-40 cursor-not-allowed text-slate-400 border border-slate-200 dark:border-slate-800"
-                                          : u.role === "admin"
-                                            ? "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer"
-                                            : "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/50 border border-amber-200/60 dark:border-amber-800/60 cursor-pointer"
-                                      }`}
-                                    >
-                                      {isActionLoading ? (
-                                        <Loader2Icon className="w-3 h-3 animate-spin" />
-                                      ) : u.role === "admin" ? (
-                                        "Demote to User"
-                                      ) : (
-                                        "Promote to Admin"
-                                      )}
-                                    </button>
+                              <TableCell className="text-right">
+                                <div className="inline-flex items-center gap-2 justify-end">
+                                  {/* Role toggle button */}
+                                  <Button
+                                    type="button"
+                                    size="xs"
+                                    variant={
+                                      u.role === "admin" ? "outline" : "subtle"
+                                    }
+                                    disabled={isSelf || isActionLoading}
+                                    onClick={() =>
+                                      handleRoleChange(
+                                        u.email,
+                                        u.role === "admin" ? "user" : "admin",
+                                      )
+                                    }
+                                    title={
+                                      isSelf
+                                        ? "Cannot alter your own role"
+                                        : `Change to ${
+                                            u.role === "admin"
+                                              ? "User"
+                                              : "Admin"
+                                          }`
+                                    }
+                                  >
+                                    {isActionLoading ? (
+                                      <Loader2Icon className="size-3 animate-spin" />
+                                    ) : u.role === "admin" ? (
+                                      "Demote to User"
+                                    ) : (
+                                      "Promote to Admin"
+                                    )}
+                                  </Button>
 
-                                    {/* Status toggle button */}
-                                    <button
-                                      type="button"
-                                      disabled={isSelf || isActionLoading}
-                                      onClick={() =>
-                                        handleStatusToggle(u.email, u.is_active)
-                                      }
-                                      title={
-                                        isSelf
-                                          ? "Cannot deactivate your own account"
-                                          : u.is_active
-                                            ? "Deactivate account"
-                                            : "Reactivate account"
-                                      }
-                                      className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all ${
-                                        isSelf
-                                          ? "opacity-40 cursor-not-allowed text-slate-400 border border-slate-200 dark:border-slate-800"
-                                          : u.is_active
-                                            ? "bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/40 border border-rose-200 dark:border-rose-800/50 cursor-pointer"
-                                            : "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 border border-emerald-200 dark:border-emerald-800/50 cursor-pointer"
-                                      }`}
-                                    >
-                                      {isActionLoading ? (
-                                        <Loader2Icon className="w-3 h-3 animate-spin" />
-                                      ) : u.is_active ? (
-                                        "Deactivate"
-                                      ) : (
-                                        "Activate"
-                                      )}
-                                    </button>
-                                  </div>
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
+                                  {/* Status toggle button */}
+                                  <Button
+                                    type="button"
+                                    size="xs"
+                                    variant={
+                                      u.is_active ? "destructive" : "secondary"
+                                    }
+                                    disabled={isSelf || isActionLoading}
+                                    onClick={() =>
+                                      handleStatusToggle(u.email, u.is_active)
+                                    }
+                                    title={
+                                      isSelf
+                                        ? "Cannot deactivate your own account"
+                                        : u.is_active
+                                          ? "Deactivate account"
+                                          : "Reactivate account"
+                                    }
+                                  >
+                                    {isActionLoading ? (
+                                      <Loader2Icon className="size-3 animate-spin" />
+                                    ) : u.is_active ? (
+                                      "Deactivate"
+                                    ) : (
+                                      "Activate"
+                                    )}
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
                   )}
                 </div>
               </div>
@@ -756,7 +759,7 @@ export function AdminModal({ isOpen, onClose }: AdminModalProps) {
                 {/* Filter and stats row */}
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-slate-500 font-medium">
+                    <span className="text-xs text-muted-foreground font-medium">
                       Action Type:
                     </span>
                     <select
@@ -766,7 +769,7 @@ export function AdminModal({ isOpen, onClose }: AdminModalProps) {
                         setActionFilter(val);
                         fetchActivity(val);
                       }}
-                      className="text-xs px-2.5 py-1 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                      className="text-xs px-2.5 py-1.5 rounded-xl border border-input bg-card text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer"
                     >
                       <option value="ALL">All Actions</option>
                       <option value="ROLE_CHANGE">Role Changes</option>
@@ -779,77 +782,82 @@ export function AdminModal({ isOpen, onClose }: AdminModalProps) {
                   </div>
 
                   {activityFeedback && (
-                    <div className="text-xs text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
-                      <AlertTriangleIcon className="w-3.5 h-3.5" />
-                      <span>{activityFeedback}</span>
-                    </div>
+                    <Alert
+                      variant="destructive"
+                      className="py-1.5 px-3 max-w-md"
+                    >
+                      <AlertDescription className="text-xs">
+                        {activityFeedback}
+                      </AlertDescription>
+                    </Alert>
                   )}
                 </div>
 
                 {/* Activity List */}
-                <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+                <div className="bg-card rounded-2xl border border-border overflow-hidden shadow-xs">
                   {isLoadingActivity ? (
-                    <div className="p-12 text-center text-slate-400 flex flex-col items-center">
-                      <Loader2Icon className="w-6 h-6 text-indigo-600 animate-spin mb-3" />
+                    <div className="p-12 text-center text-muted-foreground flex flex-col items-center">
+                      <Loader2Icon className="size-6 text-primary animate-spin mb-3" />
                       <span className="text-xs">
                         Loading activity audit trail...
                       </span>
                     </div>
                   ) : activities.length === 0 ? (
-                    <div className="p-12 text-center text-slate-400">
+                    <div className="p-12 text-center text-muted-foreground">
                       <p className="text-xs">
                         No activity records found matching the filter.
                       </p>
                     </div>
                   ) : (
-                    <div className="divide-y divide-slate-100 dark:divide-slate-800/60">
+                    <div className="divide-y divide-border">
                       {activities.map((act) => {
-                        let actionBadgeColor =
-                          "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300";
+                        let actionBadgeVariant:
+                          | "default"
+                          | "secondary"
+                          | "destructive"
+                          | "warning"
+                          | "info" = "secondary";
                         if (act.action.includes("ROLE")) {
-                          actionBadgeColor =
-                            "bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800";
+                          actionBadgeVariant = "warning";
                         } else if (
                           act.action.includes("STATUS") ||
                           act.action.includes("DEACTIVAT")
                         ) {
-                          actionBadgeColor =
-                            "bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-800";
+                          actionBadgeVariant = "destructive";
                         } else if (act.action.includes("GROUP")) {
-                          actionBadgeColor =
-                            "bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800";
+                          actionBadgeVariant = "default";
                         } else if (act.action.includes("VIEW")) {
-                          actionBadgeColor =
-                            "bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-400 border border-purple-200 dark:border-purple-800";
+                          actionBadgeVariant = "info";
                         }
 
                         return (
                           <div
                             key={act.id}
-                            className="p-4 hover:bg-slate-50/50 dark:hover:bg-slate-850/40 transition-colors"
+                            className="p-4 hover:bg-muted/40 transition-colors"
                           >
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-1.5">
                               <div className="flex items-center gap-2">
-                                <span
-                                  className={`px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider ${actionBadgeColor}`}
+                                <Badge
+                                  variant={actionBadgeVariant}
+                                  className="text-[10px] py-0 px-2 font-semibold uppercase tracking-wider"
                                 >
                                   {act.action}
-                                </span>
-                                <span className="text-xs font-semibold text-slate-900 dark:text-slate-100">
+                                </Badge>
+                                <span className="text-xs font-semibold text-foreground">
                                   {act.actor_email}
                                 </span>
                               </div>
 
-                              <span className="text-[11px] text-slate-400">
+                              <span className="text-[11px] text-muted-foreground">
                                 {new Date(act.created_at).toLocaleString()}
                               </span>
                             </div>
 
-                            <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
                               {act.target_type && (
                                 <span>
                                   Target:{" "}
-                                  <strong className="text-slate-800 dark:text-slate-200 font-medium">
+                                  <strong className="text-foreground font-medium">
                                     {act.target_id || act.target_type}
                                   </strong>
                                 </span>
@@ -861,7 +869,7 @@ export function AdminModal({ isOpen, onClose }: AdminModalProps) {
                               typeof act.details === "object" &&
                               Object.keys(act.details as object).length > 0,
                             ) && (
-                              <div className="mt-2 p-2 bg-slate-50 dark:bg-slate-950/50 rounded-lg text-[11px] font-mono text-slate-600 dark:text-slate-400 overflow-x-auto">
+                              <div className="mt-2 p-2 bg-muted/50 rounded-lg text-[11px] font-mono text-muted-foreground overflow-x-auto">
                                 {JSON.stringify(act.details)}
                               </div>
                             )}
@@ -871,22 +879,17 @@ export function AdminModal({ isOpen, onClose }: AdminModalProps) {
 
                       {/* Load More Button */}
                       {hasMoreActivity && (
-                        <div className="p-3 text-center bg-slate-50/50 dark:bg-slate-950/30">
-                          <button
+                        <div className="p-3 text-center bg-muted/20">
+                          <Button
                             type="button"
+                            variant="outline"
+                            size="sm"
                             onClick={handleLoadMoreActivity}
                             disabled={isLoadingMoreActivity}
-                            className="px-4 py-1.5 rounded-xl text-xs font-semibold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-750 transition-all cursor-pointer"
+                            isLoading={isLoadingMoreActivity}
                           >
-                            {isLoadingMoreActivity ? (
-                              <span className="flex items-center gap-1.5">
-                                <Loader2Icon className="w-3.5 h-3.5 animate-spin" />
-                                Loading older logs...
-                              </span>
-                            ) : (
-                              "Load More Activity Logs"
-                            )}
-                          </button>
+                            <span>Load More Activity Logs</span>
+                          </Button>
                         </div>
                       )}
                     </div>
@@ -902,85 +905,87 @@ export function AdminModal({ isOpen, onClose }: AdminModalProps) {
               <div className="space-y-4">
                 {/* Sub-tabs & Search */}
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 min-w-0">
-                  <div className="grid grid-cols-2 sm:flex sm:items-center gap-1 bg-white dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-800 w-full sm:w-auto shrink-0">
-                    <button
+                  <div className="grid grid-cols-2 sm:flex sm:items-center gap-1 bg-card p-1 rounded-xl border border-border w-full sm:w-auto shrink-0">
+                    <Button
                       type="button"
+                      size="sm"
+                      variant={convSubTab === "direct" ? "default" : "ghost"}
                       onClick={() => {
                         setConvSubTab("direct");
                         setInspectingPair(null);
                       }}
-                      className={`px-3 py-1.5 sm:py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer text-center truncate ${
-                        convSubTab === "direct"
-                          ? "bg-indigo-600 text-white shadow-sm"
-                          : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
-                      }`}
+                      className="text-xs truncate h-8"
                     >
                       Direct Chats (
                       {conversationsOverview?.direct_conversations?.length ?? 0}
                       )
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       type="button"
+                      size="sm"
+                      variant={convSubTab === "groups" ? "default" : "ghost"}
                       onClick={() => {
                         setConvSubTab("groups");
                         setInspectingPair(null);
                       }}
-                      className={`px-3 py-1.5 sm:py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer text-center truncate ${
-                        convSubTab === "groups"
-                          ? "bg-indigo-600 text-white shadow-sm"
-                          : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
-                      }`}
+                      className="text-xs truncate h-8"
                     >
                       Group Channels (
                       {conversationsOverview?.groups?.length ?? 0})
-                    </button>
+                    </Button>
                   </div>
 
                   <div className="relative flex-1 sm:max-w-xs md:max-w-sm w-full">
-                    <SearchIcon className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                    <input
+                    <SearchIcon className="size-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+                    <Input
                       type="text"
                       value={convSearchQuery}
                       onChange={(e) => setConvSearchQuery(e.target.value)}
                       placeholder="Filter conversations..."
-                      className="w-full pl-9 pr-3 py-1.5 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                      className="pl-9 h-9"
                     />
                   </div>
                 </div>
 
                 {conversationsFeedback && (
-                  <div className="text-xs text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
-                    <AlertTriangleIcon className="w-3.5 h-3.5" />
-                    <span>{conversationsFeedback}</span>
-                  </div>
+                  <Alert variant="destructive" className="py-1.5 px-3">
+                    <AlertDescription className="text-xs">
+                      {conversationsFeedback}
+                    </AlertDescription>
+                  </Alert>
                 )}
 
                 {/* Inspecting Pair Overlay / Embedded Viewer */}
                 {inspectingPair && (
-                  <div className="p-3.5 sm:p-4 bg-white dark:bg-slate-900 rounded-2xl border border-indigo-200 dark:border-indigo-900/60 shadow-md space-y-3 min-w-0">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-slate-100 dark:border-slate-800 pb-2.5">
+                  <div className="p-3.5 sm:p-4 bg-card rounded-2xl border border-primary/30 shadow-md space-y-3 min-w-0">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-border pb-2.5">
                       <div className="flex items-start sm:items-center gap-2 min-w-0 flex-1">
-                        <button
+                        <Button
                           type="button"
+                          variant="ghost"
+                          size="icon"
                           onClick={() => setInspectingPair(null)}
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer shrink-0 mt-0.5 sm:mt-0"
+                          className="shrink-0 size-8 mt-0.5 sm:mt-0"
                           title="Back to conversation list"
                           aria-label="Back to conversation list"
                         >
-                          <ArrowLeftIcon className="w-4 h-4" />
-                        </button>
+                          <ArrowLeftIcon className="size-4" />
+                        </Button>
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-1.5">
-                            <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                            <h4 className="text-xs font-bold text-foreground">
                               Direct Message Inspection:
                             </h4>
-                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 shrink-0 font-medium">
+                            <Badge
+                              variant="subtle"
+                              className="text-[10px] py-0 px-2 font-medium"
+                            >
                               Read-Only Moderation
-                            </span>
+                            </Badge>
                           </div>
-                          <p className="text-xs text-slate-700 dark:text-slate-200 font-semibold break-all mt-1 flex flex-wrap items-center gap-1">
+                          <p className="text-xs text-foreground font-semibold break-all mt-1 flex flex-wrap items-center gap-1">
                             <span>{inspectingPair.userA}</span>
-                            <span className="text-slate-400 font-normal">
+                            <span className="text-muted-foreground font-normal">
                               ↔
                             </span>
                             <span>{inspectingPair.userB}</span>
@@ -988,52 +993,54 @@ export function AdminModal({ isOpen, onClose }: AdminModalProps) {
                         </div>
                       </div>
 
-                      <button
+                      <Button
                         type="button"
+                        variant="ghost"
+                        size="xs"
                         onClick={() => setInspectingPair(null)}
-                        className="self-end sm:self-center text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 shrink-0 px-2 py-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+                        className="self-end sm:self-center"
                       >
                         Close
-                      </button>
+                      </Button>
                     </div>
 
-                    <p className="text-[11px] text-slate-400">
+                    <p className="text-[11px] text-muted-foreground">
                       Viewing message history between these users is strictly
                       read-only and is recorded in the platform activity audit
                       log.
                     </p>
 
                     {isLoadingInspect ? (
-                      <div className="p-8 text-center text-slate-400 flex flex-col items-center">
-                        <Loader2Icon className="w-5 h-5 text-indigo-600 animate-spin mb-2" />
+                      <div className="p-8 text-center text-muted-foreground flex flex-col items-center">
+                        <Loader2Icon className="size-5 text-primary animate-spin mb-2" />
                         <span className="text-xs">
                           Retrieving message history...
                         </span>
                       </div>
                     ) : inspectFeedback ? (
-                      <div className="p-4 text-center text-xs text-rose-500">
+                      <div className="p-4 text-center text-xs text-destructive">
                         {inspectFeedback}
                       </div>
                     ) : inspectMessages.length === 0 ? (
-                      <div className="p-8 text-center text-xs text-slate-400">
+                      <div className="p-8 text-center text-xs text-muted-foreground">
                         No messages found between these users.
                       </div>
                     ) : (
-                      <div className="max-h-72 overflow-y-auto space-y-2 p-2 bg-slate-50 dark:bg-slate-950/50 rounded-xl min-w-0">
+                      <div className="max-h-72 overflow-y-auto space-y-2 p-2 bg-muted/40 rounded-xl min-w-0">
                         {inspectMessages.map((m) => (
                           <div
                             key={m.id}
-                            className="p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 text-xs min-w-0"
+                            className="p-2.5 rounded-lg bg-card border border-border text-xs min-w-0"
                           >
                             <div className="flex flex-wrap items-center justify-between gap-1 mb-1">
-                              <span className="font-semibold text-slate-800 dark:text-slate-200 break-all">
+                              <span className="font-semibold text-foreground break-all">
                                 {m.sender_email}
                               </span>
-                              <span className="text-[10px] text-slate-400 shrink-0">
+                              <span className="text-[10px] text-muted-foreground shrink-0">
                                 {new Date(m.created_at).toLocaleString()}
                               </span>
                             </div>
-                            <p className="text-slate-600 dark:text-slate-300 break-words whitespace-pre-wrap">
+                            <p className="text-muted-foreground break-words whitespace-pre-wrap">
                               {m.message}
                             </p>
                           </div>
@@ -1045,45 +1052,48 @@ export function AdminModal({ isOpen, onClose }: AdminModalProps) {
 
                 {/* Sub-tab 1: Direct Conversations */}
                 {convSubTab === "direct" && !inspectingPair && (
-                  <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm min-w-0">
+                  <div className="bg-card rounded-2xl border border-border overflow-hidden shadow-xs min-w-0">
                     {isLoadingConversations ? (
-                      <div className="p-12 text-center text-slate-400 flex flex-col items-center">
-                        <Loader2Icon className="w-6 h-6 text-indigo-600 animate-spin mb-3" />
+                      <div className="p-12 text-center text-muted-foreground flex flex-col items-center">
+                        <Loader2Icon className="size-6 text-primary animate-spin mb-3" />
                         <span className="text-xs">
                           Loading direct conversations...
                         </span>
                       </div>
                     ) : filteredDirectConvs.length === 0 ? (
-                      <div className="p-12 text-center text-slate-400 text-xs">
+                      <div className="p-12 text-center text-muted-foreground text-xs">
                         No direct conversations found.
                       </div>
                     ) : (
                       <>
                         {/* Mobile Card List (Visible on screens < md) */}
-                        <div className="block md:hidden divide-y divide-slate-100 dark:divide-slate-800/60 p-2 sm:p-3 space-y-2">
+                        <div className="block md:hidden divide-y divide-border p-2 sm:p-3 space-y-2">
                           {filteredDirectConvs.map((dc, idx) => (
                             <div
                               key={`mobile-${dc.user_a}-${dc.user_b}-${idx}`}
-                              className="p-3 rounded-xl bg-slate-50/70 dark:bg-slate-950/40 border border-slate-200/60 dark:border-slate-800/60 space-y-2.5"
+                              className="p-3 rounded-xl bg-muted/30 border border-border space-y-2.5"
                             >
                               <div className="space-y-1 min-w-0">
-                                <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">
+                                <span className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground">
                                   Participants
                                 </span>
-                                <div className="text-xs font-semibold text-slate-800 dark:text-slate-200 break-all flex flex-wrap items-center gap-1.5">
+                                <div className="text-xs font-semibold text-foreground break-all flex flex-wrap items-center gap-1.5">
                                   <span>{dc.user_a}</span>
-                                  <span className="text-slate-400 font-normal">
+                                  <span className="text-muted-foreground font-normal">
                                     ↔
                                   </span>
                                   <span>{dc.user_b}</span>
                                 </div>
                               </div>
 
-                              <div className="flex items-center justify-between pt-1 border-t border-slate-200/40 dark:border-slate-800/40 text-[11px]">
-                                <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
-                                  <span className="font-medium bg-slate-200/60 dark:bg-slate-800 px-2 py-0.5 rounded-md">
+                              <div className="flex items-center justify-between pt-1 border-t border-border text-[11px]">
+                                <div className="flex items-center gap-2 text-muted-foreground">
+                                  <Badge
+                                    variant="secondary"
+                                    className="text-[11px] py-0 px-2 font-medium"
+                                  >
                                     {dc.total_messages} msgs
-                                  </span>
+                                  </Badge>
                                   <span>
                                     {new Date(
                                       dc.last_activity,
@@ -1091,79 +1101,86 @@ export function AdminModal({ isOpen, onClose }: AdminModalProps) {
                                   </span>
                                 </div>
 
-                                <button
+                                <Button
                                   type="button"
+                                  size="xs"
+                                  variant="subtle"
                                   onClick={() =>
                                     handleInspectMessages(dc.user_a, dc.user_b)
                                   }
-                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 border border-indigo-200/60 dark:border-indigo-800/60 transition-colors cursor-pointer shadow-2xs"
+                                  className="gap-1.5"
                                 >
-                                  <EyeIcon className="w-3.5 h-3.5" />
+                                  <EyeIcon className="size-3.5" />
                                   <span>Inspect</span>
-                                </button>
+                                </Button>
                               </div>
                             </div>
                           ))}
                         </div>
 
                         {/* Desktop Table (Visible on md and up) */}
-                        <div className="hidden md:block overflow-x-auto">
-                          <table className="w-full text-left text-xs border-collapse">
-                            <thead>
-                              <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/40 text-slate-500 dark:text-slate-400 font-semibold">
-                                <th className="py-3 px-4">Participants</th>
-                                <th className="py-3 px-4">Total Messages</th>
-                                <th className="py-3 px-4">Last Activity</th>
-                                <th className="py-3 px-4 text-right">Action</th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
+                        <div className="hidden md:block">
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead>Participants</TableHead>
+                                <TableHead>Total Messages</TableHead>
+                                <TableHead>Last Activity</TableHead>
+                                <TableHead className="text-right">
+                                  Action
+                                </TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
                               {filteredDirectConvs.map((dc, idx) => (
-                                <tr
+                                <TableRow
                                   key={`${dc.user_a}-${dc.user_b}-${idx}`}
-                                  className="hover:bg-slate-50/50 dark:hover:bg-slate-850/40 transition-colors"
                                 >
-                                  <td className="py-3 px-4">
+                                  <TableCell>
                                     <div className="flex items-center gap-2">
-                                      <span className="font-semibold text-slate-800 dark:text-slate-200">
+                                      <span className="font-semibold text-foreground">
                                         {dc.user_a}
                                       </span>
-                                      <span className="text-slate-400">↔</span>
-                                      <span className="font-semibold text-slate-800 dark:text-slate-200">
+                                      <span className="text-muted-foreground">
+                                        ↔
+                                      </span>
+                                      <span className="font-semibold text-foreground">
                                         {dc.user_b}
                                       </span>
                                     </div>
-                                  </td>
+                                  </TableCell>
 
-                                  <td className="py-3 px-4 text-slate-600 dark:text-slate-400">
+                                  <TableCell className="text-muted-foreground">
                                     {dc.total_messages} msgs
-                                  </td>
+                                  </TableCell>
 
-                                  <td className="py-3 px-4 text-slate-400 text-[11px]">
+                                  <TableCell className="text-muted-foreground text-[11px]">
                                     {new Date(
                                       dc.last_activity,
                                     ).toLocaleDateString()}
-                                  </td>
+                                  </TableCell>
 
-                                  <td className="py-3 px-4 text-right">
-                                    <button
+                                  <TableCell className="text-right">
+                                    <Button
                                       type="button"
+                                      size="xs"
+                                      variant="subtle"
                                       onClick={() =>
                                         handleInspectMessages(
                                           dc.user_a,
                                           dc.user_b,
                                         )
                                       }
-                                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 border border-indigo-200/60 dark:border-indigo-800/60 transition-colors cursor-pointer"
+                                      className="gap-1.5"
                                     >
-                                      <EyeIcon className="w-3 h-3" />
+                                      <EyeIcon className="size-3" />
                                       <span>Inspect</span>
-                                    </button>
-                                  </td>
-                                </tr>
+                                    </Button>
+                                  </TableCell>
+                                </TableRow>
                               ))}
-                            </tbody>
-                          </table>
+                            </TableBody>
+                          </Table>
                         </div>
                       </>
                     )}
@@ -1172,44 +1189,47 @@ export function AdminModal({ isOpen, onClose }: AdminModalProps) {
 
                 {/* Sub-tab 2: Group Channels */}
                 {convSubTab === "groups" && !inspectingPair && (
-                  <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm min-w-0">
+                  <div className="bg-card rounded-2xl border border-border overflow-hidden shadow-xs min-w-0">
                     {isLoadingConversations ? (
-                      <div className="p-12 text-center text-slate-400 flex flex-col items-center">
-                        <Loader2Icon className="w-6 h-6 text-indigo-600 animate-spin mb-3" />
+                      <div className="p-12 text-center text-muted-foreground flex flex-col items-center">
+                        <Loader2Icon className="size-6 text-primary animate-spin mb-3" />
                         <span className="text-xs">
                           Loading group channels...
                         </span>
                       </div>
                     ) : filteredGroups.length === 0 ? (
-                      <div className="p-12 text-center text-slate-400 text-xs">
+                      <div className="p-12 text-center text-muted-foreground text-xs">
                         No group channels found.
                       </div>
                     ) : (
                       <>
                         {/* Mobile Card List (Visible on screens < md) */}
-                        <div className="block md:hidden divide-y divide-slate-100 dark:divide-slate-800/60 p-2 sm:p-3 space-y-2">
+                        <div className="block md:hidden divide-y divide-border p-2 sm:p-3 space-y-2">
                           {filteredGroups.map((g) => (
                             <div
                               key={`mobile-group-${g.group_id}`}
-                              className="p-3 rounded-xl bg-slate-50/70 dark:bg-slate-950/40 border border-slate-200/60 dark:border-slate-800/60 space-y-2"
+                              className="p-3 rounded-xl bg-muted/30 border border-border space-y-2"
                             >
                               <div className="flex items-center justify-between gap-2">
-                                <span className="font-semibold text-xs text-slate-900 dark:text-slate-100 truncate">
+                                <span className="font-semibold text-xs text-foreground truncate">
                                   {g.name}
                                 </span>
-                                <span className="text-[11px] font-medium bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 border border-indigo-200/60 dark:border-indigo-800/60 px-2 py-0.5 rounded-md shrink-0">
+                                <Badge
+                                  variant="subtle"
+                                  className="text-[11px] py-0 px-2 font-medium shrink-0"
+                                >
                                   {g.member_count} members
-                                </span>
+                                </Badge>
                               </div>
 
                               <div className="text-[11px] space-y-0.5">
-                                <div className="text-slate-500 dark:text-slate-400 break-all">
+                                <div className="text-muted-foreground break-all">
                                   Creator:{" "}
-                                  <span className="text-slate-700 dark:text-slate-300 font-medium">
+                                  <span className="text-foreground font-medium">
                                     {g.creator_email}
                                   </span>
                                 </div>
-                                <div className="text-slate-400 text-[10px]">
+                                <div className="text-muted-foreground text-[10px]">
                                   Last Activity:{" "}
                                   {new Date(
                                     g.last_activity,
@@ -1221,43 +1241,40 @@ export function AdminModal({ isOpen, onClose }: AdminModalProps) {
                         </div>
 
                         {/* Desktop Table (Visible on md and up) */}
-                        <div className="hidden md:block overflow-x-auto">
-                          <table className="w-full text-left text-xs border-collapse">
-                            <thead>
-                              <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/40 text-slate-500 dark:text-slate-400 font-semibold">
-                                <th className="py-3 px-4">Group Name</th>
-                                <th className="py-3 px-4">Creator</th>
-                                <th className="py-3 px-4">Members</th>
-                                <th className="py-3 px-4">Last Activity</th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
+                        <div className="hidden md:block">
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead>Group Name</TableHead>
+                                <TableHead>Creator</TableHead>
+                                <TableHead>Members</TableHead>
+                                <TableHead>Last Activity</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
                               {filteredGroups.map((g) => (
-                                <tr
-                                  key={g.group_id}
-                                  className="hover:bg-slate-50/50 dark:hover:bg-slate-850/40 transition-colors"
-                                >
-                                  <td className="py-3 px-4 font-semibold text-slate-900 dark:text-slate-100">
+                                <TableRow key={g.group_id}>
+                                  <TableCell className="font-semibold text-foreground">
                                     {g.name}
-                                  </td>
+                                  </TableCell>
 
-                                  <td className="py-3 px-4 text-slate-600 dark:text-slate-400">
+                                  <TableCell className="text-muted-foreground">
                                     {g.creator_email}
-                                  </td>
+                                  </TableCell>
 
-                                  <td className="py-3 px-4 text-slate-600 dark:text-slate-400">
+                                  <TableCell className="text-muted-foreground">
                                     {g.member_count} members
-                                  </td>
+                                  </TableCell>
 
-                                  <td className="py-3 px-4 text-slate-400 text-[11px]">
+                                  <TableCell className="text-muted-foreground text-[11px]">
                                     {new Date(
                                       g.last_activity,
                                     ).toLocaleDateString()}
-                                  </td>
-                                </tr>
+                                  </TableCell>
+                                </TableRow>
                               ))}
-                            </tbody>
-                          </table>
+                            </TableBody>
+                          </Table>
                         </div>
                       </>
                     )}

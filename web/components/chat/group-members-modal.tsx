@@ -1,10 +1,21 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { apiClient, type GroupMemberItem } from "@/lib/api-client";
 import { useAuth } from "@/lib/auth-context";
 import { Avatar } from "../ui/avatar";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Alert, AlertDescription } from "../ui/alert";
+import { Empty, EmptyIcon, EmptyTitle, EmptyDescription } from "../ui/empty";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "../ui/dialog";
 import {
   SearchIcon,
   XIcon,
@@ -63,18 +74,6 @@ export function GroupMembersModal({
     setFeedback(null);
     onClose();
   }, [onClose]);
-
-  // Keyboard Escape listener
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        handleClose();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, handleClose]);
 
   // Fetch group members whenever modal opens or groupId changes
   const loadMembers = useCallback(async () => {
@@ -209,109 +208,84 @@ export function GroupMembersModal({
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <AnimatePresence>
-      <div
-        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="group-members-modal-title"
+    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+      <DialogContent
+        maxWidth="max-w-lg"
+        className="p-0 flex flex-col max-h-[85vh]"
       >
-        <motion.div
-          initial={{ opacity: 0, scale: 0.96 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.96 }}
-          transition={{ duration: 0.15 }}
-          className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col max-h-[85vh] overflow-hidden"
-        >
-          {/* Header */}
-          <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between shrink-0">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-900/60 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
-                <UsersIcon className="w-5 h-5" />
-              </div>
-              <div>
-                <h3
-                  id="group-members-modal-title"
-                  className="text-base font-semibold text-slate-900 dark:text-slate-100"
-                >
-                  {groupName}
-                </h3>
-                <p className="text-xs text-slate-500">
-                  {members.length} {members.length === 1 ? "member" : "members"}
-                </p>
-              </div>
+        {/* Header */}
+        <DialogHeader className="px-6 pt-6 pb-4 border-b border-border mb-0">
+          <div className="flex items-center gap-3">
+            <div className="size-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+              <UsersIcon className="size-5" />
             </div>
+            <div>
+              <DialogTitle>{groupName}</DialogTitle>
+              <DialogDescription>
+                {members.length} {members.length === 1 ? "member" : "members"}
+              </DialogDescription>
+            </div>
+          </div>
+        </DialogHeader>
+
+        {/* Navigation Tabs (Visible when user is creator) */}
+        {isCreator && (
+          <div className="px-6 pt-2 pb-0 border-b border-border flex items-center gap-2 bg-muted/20 shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab("members");
+                setFeedback(null);
+              }}
+              className={`flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-t-lg transition-colors border-b-2 cursor-pointer ${
+                activeTab === "members"
+                  ? "border-primary text-primary bg-background"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <UsersIcon className="size-4" />
+              <span>Members ({members.length})</span>
+            </button>
 
             <button
               type="button"
-              onClick={handleClose}
-              aria-label="Close dialog"
-              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              onClick={() => {
+                setActiveTab("add");
+                setFeedback(null);
+              }}
+              className={`flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-t-lg transition-colors border-b-2 cursor-pointer ${
+                activeTab === "add"
+                  ? "border-primary text-primary bg-background"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
+              }`}
             >
-              <XIcon className="w-5 h-5" />
+              <PlusIcon className="size-4" />
+              <span>Add Member</span>
             </button>
           </div>
+        )}
 
-          {/* Navigation Tabs (Visible when user is creator) */}
-          {isCreator && (
-            <div className="px-5 pt-3 pb-0 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2 bg-slate-50/50 dark:bg-slate-950/30 shrink-0">
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTab("members");
-                  setFeedback(null);
-                }}
-                className={`flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-t-lg transition-colors border-b-2 cursor-pointer ${
-                  activeTab === "members"
-                    ? "border-indigo-600 text-indigo-600 dark:text-indigo-400 dark:border-indigo-400 bg-white dark:bg-slate-900"
-                    : "border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
-                }`}
-              >
-                <UsersIcon className="w-4 h-4" />
-                <span>Members ({members.length})</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTab("add");
-                  setFeedback(null);
-                }}
-                className={`flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-t-lg transition-colors border-b-2 cursor-pointer ${
-                  activeTab === "add"
-                    ? "border-indigo-600 text-indigo-600 dark:text-indigo-400 dark:border-indigo-400 bg-white dark:bg-slate-900"
-                    : "border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
-                }`}
-              >
-                <PlusIcon className="w-4 h-4" />
-                <span>Add Member</span>
-              </button>
-            </div>
-          )}
-
-          {/* Modal Content */}
-          <div className="flex-1 overflow-y-auto p-5">
-            {/* Feedback alert banner */}
-            {feedback && (
-              <div
-                role="alert"
-                aria-live="polite"
-                className={`mb-4 p-3 rounded-xl text-xs flex items-center justify-between ${
-                  feedback.type === "success"
-                    ? "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
-                    : "bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800"
-                }`}
+        {/* Modal Content */}
+        <div className="flex-1 overflow-y-auto p-6">
+          {/* Feedback alert banner */}
+          {feedback && (
+            <div className="mb-4">
+              <Alert
+                variant={
+                  feedback.type === "success" ? "success" : "destructive"
+                }
+                className="flex items-center justify-between py-2 px-3"
               >
                 <div className="flex items-center gap-2">
                   {feedback.type === "success" ? (
-                    <CheckIcon className="w-4 h-4 shrink-0 text-emerald-500" />
+                    <CheckIcon className="size-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
                   ) : (
-                    <XIcon className="w-4 h-4 shrink-0 text-rose-500" />
+                    <XIcon className="size-4 shrink-0 text-destructive" />
                   )}
-                  <span>{feedback.message}</span>
+                  <AlertDescription className="text-xs">
+                    {feedback.message}
+                  </AlertDescription>
                 </div>
                 <button
                   type="button"
@@ -319,246 +293,258 @@ export function GroupMembersModal({
                   className="p-1 hover:opacity-75 transition-opacity cursor-pointer"
                   aria-label="Dismiss feedback"
                 >
-                  <XIcon className="w-3.5 h-3.5" />
+                  <XIcon className="size-3.5" />
                 </button>
-              </div>
-            )}
+              </Alert>
+            </div>
+          )}
 
-            {/* TAB 1: VIEW MEMBERS */}
-            {activeTab === "members" && (
-              <div className="space-y-3">
-                {isLoadingMembers ? (
-                  <div className="py-12 flex flex-col items-center justify-center text-slate-400">
-                    <Loader2Icon className="w-7 h-7 animate-spin text-indigo-500 mb-2" />
-                    <p className="text-xs">Loading group members...</p>
-                  </div>
-                ) : membersError ? (
-                  <div className="py-8 text-center">
-                    <p className="text-xs text-rose-500 mb-3">{membersError}</p>
-                    <button
-                      type="button"
-                      onClick={() => void loadMembers()}
-                      className="px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer"
+          {/* TAB 1: VIEW MEMBERS */}
+          {activeTab === "members" && (
+            <div className="space-y-3">
+              {isLoadingMembers ? (
+                <div className="py-12 flex flex-col items-center justify-center text-muted-foreground">
+                  <Loader2Icon className="size-7 animate-spin text-primary mb-2" />
+                  <p className="text-xs">Loading group members...</p>
+                </div>
+              ) : membersError ? (
+                <div className="py-8 text-center">
+                  <p className="text-xs text-destructive mb-3">
+                    {membersError}
+                  </p>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => void loadMembers()}
+                  >
+                    Retry
+                  </Button>
+                </div>
+              ) : members.length === 0 ? (
+                <Empty className="py-8 border-none">
+                  <EmptyIcon className="size-10 bg-muted text-muted-foreground">
+                    <UserIcon className="size-5" />
+                  </EmptyIcon>
+                  <EmptyTitle className="text-sm">No members found</EmptyTitle>
+                  <EmptyDescription>
+                    No members exist in this group channel.
+                  </EmptyDescription>
+                </Empty>
+              ) : (
+                <div className="divide-y divide-border">
+                  {members.map((member) => (
+                    <div
+                      key={member.email}
+                      className="py-3 flex items-center justify-between gap-3 first:pt-0 last:pb-0"
                     >
-                      Retry
-                    </button>
-                  </div>
-                ) : members.length === 0 ? (
-                  <div className="py-12 text-center text-slate-400">
-                    <UserIcon className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                    <p className="text-xs">No members found in this group.</p>
-                  </div>
-                ) : (
-                  <div className="divide-y divide-slate-100 dark:divide-slate-800/60">
-                    {members.map((member) => (
-                      <div
-                        key={member.email}
-                        className="py-3 flex items-center justify-between gap-3 first:pt-0 last:pb-0"
-                      >
-                        <div className="flex items-center gap-3 min-w-0">
-                          <Avatar
-                            name={member.name || member.email}
-                            email={member.email}
-                            avatarUrl={member.avatar_url}
-                            size="md"
-                          />
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-2">
-                              <h4 className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">
-                                {member.name || member.email}
-                              </h4>
-                              {member.is_creator && (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800/60 shrink-0">
-                                  <ShieldIcon className="w-3 h-3" />
-                                  Creator
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-xs text-slate-400 truncate">
-                              {member.email}
-                            </p>
+                      <div className="flex items-center gap-3 min-w-0">
+                        <Avatar
+                          name={member.name || member.email}
+                          email={member.email}
+                          avatarUrl={member.avatar_url}
+                          size="md"
+                        />
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <h4 className="text-sm font-medium text-foreground truncate">
+                              {member.name || member.email}
+                            </h4>
+                            {member.is_creator && (
+                              <Badge
+                                variant="warning"
+                                className="text-[10px] py-0 px-1.5 shrink-0"
+                              >
+                                <ShieldIcon className="size-3" />
+                                <span>Creator</span>
+                              </Badge>
+                            )}
                           </div>
-                        </div>
-
-                        <div className="text-right shrink-0">
-                          <span className="text-[11px] text-slate-400">
-                            Joined{" "}
-                            {member.joined_at
-                              ? new Date(member.joined_at).toLocaleDateString(
-                                  undefined,
-                                  {
-                                    month: "short",
-                                    day: "numeric",
-                                    year: "numeric",
-                                  },
-                                )
-                              : "recently"}
-                          </span>
+                          <p className="text-xs text-muted-foreground truncate">
+                            {member.email}
+                          </p>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                )}
 
-                {/* Creator shortcut to switch to Add Member */}
-                {isCreator && !isLoadingMembers && (
-                  <div className="pt-4 mt-2 border-t border-slate-100 dark:border-slate-800 flex justify-end">
+                      <div className="text-right shrink-0">
+                        <span className="text-[11px] text-muted-foreground">
+                          Joined{" "}
+                          {member.joined_at
+                            ? new Date(member.joined_at).toLocaleDateString(
+                                undefined,
+                                {
+                                  month: "short",
+                                  day: "numeric",
+                                  year: "numeric",
+                                },
+                              )
+                            : "recently"}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Creator shortcut to switch to Add Member */}
+              {isCreator && !isLoadingMembers && (
+                <div className="pt-4 mt-2 border-t border-border flex justify-end">
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => setActiveTab("add")}
+                    className="gap-1.5"
+                  >
+                    <PlusIcon className="size-3.5" />
+                    <span>Add Member</span>
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* TAB 2: ADD MEMBER (Visible to group creator only) */}
+          {activeTab === "add" && isCreator && (
+            <div className="space-y-4">
+              {/* Search input */}
+              <div>
+                <label
+                  htmlFor="candidate-search"
+                  className="block text-xs font-semibold text-foreground mb-1.5"
+                >
+                  Search Users to Add
+                </label>
+                <div className="relative">
+                  <SearchIcon className="size-4 text-muted-foreground absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <Input
+                    id="candidate-search"
+                    type="text"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Search by name or email address..."
+                    aria-label="Search users to add to group"
+                    autoFocus
+                    className="pl-9 pr-9"
+                  />
+                  {search && (
                     <button
                       type="button"
-                      onClick={() => setActiveTab("add")}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm transition-colors cursor-pointer"
+                      onClick={() => setSearch("")}
+                      aria-label="Clear search"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 text-muted-foreground hover:text-foreground cursor-pointer"
                     >
-                      <PlusIcon className="w-3.5 h-3.5" />
-                      <span>Add Member</span>
+                      <XIcon className="size-3.5" />
                     </button>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* TAB 2: ADD MEMBER (Visible to group creator only) */}
-            {activeTab === "add" && isCreator && (
-              <div className="space-y-4">
-                {/* Search input */}
-                <div>
-                  <label
-                    htmlFor="candidate-search"
-                    className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5"
-                  >
-                    Search Users to Add
-                  </label>
-                  <div className="relative">
-                    <SearchIcon className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                    <input
-                      id="candidate-search"
-                      type="text"
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                      placeholder="Search by name or email address..."
-                      aria-label="Search users to add to group"
-                      autoFocus
-                      className="w-full pl-9 pr-9 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-shadow"
-                    />
-                    {search && (
-                      <button
-                        type="button"
-                        onClick={() => setSearch("")}
-                        aria-label="Clear search"
-                        className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
-                      >
-                        <XIcon className="w-3.5 h-3.5" />
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* Candidates List */}
-                <div className="space-y-2">
-                  <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 block">
-                    Available Users
-                  </span>
-
-                  {isLoadingCandidates ? (
-                    <div className="py-8 flex flex-col items-center justify-center text-slate-400">
-                      <Loader2Icon className="w-6 h-6 animate-spin text-indigo-500 mb-2" />
-                      <p className="text-xs">Searching users...</p>
-                    </div>
-                  ) : candidates.length === 0 ? (
-                    <div className="py-8 text-center text-slate-400 bg-slate-50 dark:bg-slate-950/40 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
-                      <UserIcon className="w-6 h-6 mx-auto mb-1.5 opacity-50" />
-                      <p className="text-xs">
-                        {search.trim()
-                          ? `No users found matching "${search}"`
-                          : "No users available to add."}
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="max-h-64 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/50">
-                      {candidates.map((candidate) => {
-                        const isAlreadyMember = members.some(
-                          (m) =>
-                            m.email.toLowerCase() ===
-                            candidate.email.toLowerCase(),
-                        );
-                        const isAdding = addingEmail === candidate.email;
-
-                        return (
-                          <div
-                            key={candidate.email}
-                            className="p-3 flex items-center justify-between gap-3 hover:bg-slate-50/70 dark:hover:bg-slate-900/50 transition-colors"
-                          >
-                            <div className="flex items-center gap-3 min-w-0">
-                              <Avatar
-                                name={candidate.name || candidate.email}
-                                email={candidate.email}
-                                avatarUrl={candidate.avatar_url}
-                                size="sm"
-                              />
-                              <div className="min-w-0">
-                                <h4 className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">
-                                  {candidate.name || candidate.email}
-                                </h4>
-                                <p className="text-xs text-slate-400 truncate">
-                                  {candidate.email}
-                                </p>
-                              </div>
-                            </div>
-
-                            <div className="shrink-0">
-                              {isAlreadyMember ? (
-                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 border border-slate-200/60 dark:border-slate-700/60">
-                                  <CheckIcon className="w-3.5 h-3.5" />
-                                  Already a member
-                                </span>
-                              ) : (
-                                <button
-                                  type="button"
-                                  onClick={() => handleAddMember(candidate)}
-                                  disabled={isAdding}
-                                  aria-label={`Add ${candidate.name || candidate.email} to group`}
-                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white shadow-xs transition-colors cursor-pointer"
-                                >
-                                  {isAdding ? (
-                                    <>
-                                      <Loader2Icon className="w-3.5 h-3.5 animate-spin" />
-                                      <span>Adding...</span>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <PlusIcon className="w-3.5 h-3.5" />
-                                      <span>Add</span>
-                                    </>
-                                  )}
-                                </button>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
                   )}
                 </div>
               </div>
-            )}
-          </div>
 
-          {/* Modal Footer */}
-          <div className="px-5 py-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/30 flex items-center justify-between shrink-0">
-            <span className="text-[11px] text-slate-400">
-              {isCreator
-                ? "You are the creator of this group."
-                : "You are a member of this group."}
-            </span>
-            <button
-              type="button"
-              onClick={handleClose}
-              className="px-3.5 py-1.5 text-xs font-semibold rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-            >
-              Close
-            </button>
-          </div>
-        </motion.div>
-      </div>
-    </AnimatePresence>
+              {/* Candidates List */}
+              <div className="space-y-2">
+                <span className="text-xs font-semibold text-muted-foreground block">
+                  Available Users
+                </span>
+
+                {isLoadingCandidates ? (
+                  <div className="py-8 flex flex-col items-center justify-center text-muted-foreground">
+                    <Loader2Icon className="size-6 animate-spin text-primary mb-2" />
+                    <p className="text-xs">Searching users...</p>
+                  </div>
+                ) : candidates.length === 0 ? (
+                  <Empty className="py-8 border-dashed">
+                    <EmptyIcon className="size-10 bg-muted text-muted-foreground">
+                      <UserIcon className="size-5" />
+                    </EmptyIcon>
+                    <EmptyTitle className="text-xs font-medium">
+                      {search.trim()
+                        ? `No users found matching "${search}"`
+                        : "No users available to add."}
+                    </EmptyTitle>
+                  </Empty>
+                ) : (
+                  <div className="max-h-64 overflow-y-auto divide-y divide-border rounded-xl border border-border bg-card">
+                    {candidates.map((candidate) => {
+                      const isAlreadyMember = members.some(
+                        (m) =>
+                          m.email.toLowerCase() ===
+                          candidate.email.toLowerCase(),
+                      );
+                      const isAdding = addingEmail === candidate.email;
+
+                      return (
+                        <div
+                          key={candidate.email}
+                          className="p-3 flex items-center justify-between gap-3 hover:bg-accent transition-colors"
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <Avatar
+                              name={candidate.name || candidate.email}
+                              email={candidate.email}
+                              avatarUrl={candidate.avatar_url}
+                              size="sm"
+                            />
+                            <div className="min-w-0">
+                              <h4 className="text-sm font-medium text-foreground truncate">
+                                {candidate.name || candidate.email}
+                              </h4>
+                              <p className="text-xs text-muted-foreground truncate">
+                                {candidate.email}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="shrink-0">
+                            {isAlreadyMember ? (
+                              <Badge
+                                variant="outline"
+                                className="text-xs gap-1"
+                              >
+                                <CheckIcon className="size-3" />
+                                <span>Already a member</span>
+                              </Badge>
+                            ) : (
+                              <Button
+                                type="button"
+                                size="xs"
+                                onClick={() => handleAddMember(candidate)}
+                                disabled={isAdding}
+                                isLoading={isAdding}
+                                aria-label={`Add ${candidate.name || candidate.email} to group`}
+                              >
+                                {!isAdding && (
+                                  <PlusIcon className="size-3 mr-1" />
+                                )}
+                                <span>Add</span>
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Modal Footer */}
+        <div className="px-6 py-3.5 border-t border-border bg-muted/20 flex items-center justify-between shrink-0">
+          <span className="text-[11px] text-muted-foreground">
+            {isCreator
+              ? "You are the creator of this group."
+              : "You are a member of this group."}
+          </span>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleClose}
+          >
+            Close
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

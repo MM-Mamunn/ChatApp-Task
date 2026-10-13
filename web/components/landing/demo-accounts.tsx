@@ -10,6 +10,7 @@ import {
   ChevronRightIcon,
   ZapIcon,
 } from "../ui/icons";
+import { Badge } from "../ui/badge";
 
 interface PersonaCard {
   role: "admin" | "user";
@@ -111,9 +112,14 @@ export function LandingDemoAccounts() {
                       <h3 className="text-base font-bold text-white">
                         {persona.title}
                       </h3>
-                      <span className="text-[11px] text-slate-400 font-medium">
+                      <Badge
+                        variant={
+                          persona.role === "admin" ? "warning" : "secondary"
+                        }
+                        className="text-[10px] py-0 px-2 font-medium"
+                      >
                         {persona.badge}
-                      </span>
+                      </Badge>
                     </div>
                   </div>
                 </div>

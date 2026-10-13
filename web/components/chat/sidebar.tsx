@@ -4,6 +4,15 @@ import React, { useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { type DirectConversationItem, type GroupItem } from "@/lib/api-client";
 import { Avatar } from "../ui/avatar";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
+import {
+  Empty,
+  EmptyIcon,
+  EmptyTitle,
+  EmptyDescription,
+  EmptyAction,
+} from "../ui/empty";
 import {
   MessageSquareIcon,
   UsersIcon,
@@ -102,13 +111,13 @@ export function Sidebar({
   });
 
   return (
-    <aside className="w-full md:w-80 lg:w-96 flex flex-col h-full min-h-0 bg-slate-50/70 dark:bg-slate-900/70 border-r border-slate-200 dark:border-slate-800 shrink-0 select-none overflow-hidden">
+    <aside className="w-full md:w-80 lg:w-96 flex flex-col h-full min-h-0 bg-sidebar/95 border-r border-sidebar-border shrink-0 select-none overflow-hidden transition-colors">
       {/* User profile & actions banner */}
-      <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-white/60 dark:bg-slate-950/40 backdrop-blur-sm flex items-center justify-between">
+      <div className="p-3.5 border-b border-sidebar-border bg-sidebar/80 backdrop-blur-md flex items-center justify-between">
         <button
           type="button"
           onClick={onOpenProfile}
-          className="flex items-center gap-3 text-left group p-1 -m-1 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-colors cursor-pointer"
+          className="flex items-center gap-3 text-left group p-1 -m-1 rounded-xl hover:bg-sidebar-accent transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <div className="relative">
             <Avatar
@@ -117,18 +126,18 @@ export function Sidebar({
               avatarUrl={user?.avatar_url}
               size="md"
             />
-            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-slate-900" />
+            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 ring-2 ring-sidebar" />
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
-              <span className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+              <span className="text-sm font-semibold text-sidebar-foreground truncate group-hover:text-primary transition-colors">
                 {user?.name || "User"}
               </span>
               {user?.role === "admin" && (
                 <ShieldIcon className="w-3.5 h-3.5 text-amber-500 shrink-0" />
               )}
             </div>
-            <p className="text-xs text-slate-400 truncate max-w-[130px]">
+            <p className="text-xs text-muted-foreground truncate max-w-[130px]">
               {user?.email}
             </p>
           </div>
@@ -136,25 +145,29 @@ export function Sidebar({
 
         <div className="flex items-center gap-1">
           {user?.role === "admin" && (
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="icon"
               onClick={onOpenAdmin}
               title="Open Admin Oversight Console"
               aria-label="Open Admin Oversight Console"
-              className="p-2 rounded-xl text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 transition-colors cursor-pointer"
+              className="text-amber-600 dark:text-amber-400 hover:bg-amber-500/10"
             >
               <ShieldIcon className="w-4 h-4" />
-            </button>
+            </Button>
           )}
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon"
             onClick={logout}
             title="Sign out"
             aria-label="Sign out"
-            className="p-2 rounded-xl text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer"
+            className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
           >
             <LogOutIcon className="w-4 h-4" />
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -165,50 +178,56 @@ export function Sidebar({
             type="button"
             onClick={onOpenAdmin}
             aria-label="Open Admin Console"
-            className="w-full flex items-center justify-between py-2 px-3 rounded-xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent hover:from-amber-500/20 hover:to-amber-500/10 border border-amber-200/80 dark:border-amber-800/60 text-amber-800 dark:text-amber-300 text-xs font-semibold transition-all cursor-pointer shadow-xs"
+            className="w-full flex items-center justify-between py-2 px-3 rounded-xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent hover:from-amber-500/20 hover:to-amber-500/10 border border-amber-500/25 text-amber-700 dark:text-amber-300 text-xs font-semibold transition-all cursor-pointer shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
           >
             <div className="flex items-center gap-2">
               <ShieldIcon className="w-4 h-4 text-amber-500 shrink-0" />
               <span>Admin Console</span>
             </div>
-            <span className="text-[10px] px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-950/80 text-amber-700 dark:text-amber-400 border border-amber-200/60 dark:border-amber-800/60 font-bold uppercase tracking-wider">
+            <Badge
+              variant="warning"
+              className="text-[10px] py-0 px-1.5 font-bold tracking-wider uppercase"
+            >
               Admin
-            </span>
+            </Badge>
           </button>
         </div>
       )}
 
       {/* Quick Action Buttons */}
-      <div className="p-3 grid grid-cols-2 gap-2 border-b border-slate-200/80 dark:border-slate-800/80">
-        <button
+      <div className="p-3 grid grid-cols-2 gap-2 border-b border-sidebar-border">
+        <Button
           type="button"
           onClick={onOpenCreateChat}
-          className="flex items-center justify-center gap-2 py-2 px-3 text-xs font-semibold rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm shadow-indigo-600/20 transition-all cursor-pointer"
+          size="sm"
+          className="shadow-sm font-semibold"
         >
           <PlusIcon className="w-3.5 h-3.5" />
           <span>New Chat</span>
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
           onClick={onOpenCreateGroup}
-          className="flex items-center justify-center gap-2 py-2 px-3 text-xs font-semibold rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-750 transition-all cursor-pointer"
+          variant="outline"
+          size="sm"
+          className="font-semibold bg-background/50 hover:bg-sidebar-accent"
         >
-          <UsersIcon className="w-3.5 h-3.5 text-indigo-500" />
+          <UsersIcon className="w-3.5 h-3.5 text-primary" />
           <span>New Group</span>
-        </button>
+        </Button>
       </div>
 
       {/* Search & Filter Bar */}
       <div className="px-3 pt-3 pb-2">
         <div className="relative">
-          <SearchIcon className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <SearchIcon className="w-3.5 h-3.5 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={filterQuery}
             onChange={(e) => setFilterQuery(e.target.value)}
             placeholder="Search conversations..."
             aria-label="Search conversations"
-            className="w-full pl-9 pr-3 py-1.5 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all"
+            className="w-full pl-9 pr-3 py-1.5 text-xs rounded-xl border border-input bg-background/70 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
           />
         </div>
       </div>
@@ -217,7 +236,7 @@ export function Sidebar({
       <div
         role="tablist"
         aria-label="Conversation category filters"
-        className="px-3 pb-2 flex gap-1 text-[11px] font-medium border-b border-slate-200/60 dark:border-slate-800/60"
+        className="px-3 pb-2 flex gap-1 text-[11px] font-medium border-b border-sidebar-border"
       >
         <button
           type="button"
@@ -226,14 +245,14 @@ export function Sidebar({
           onClick={() => setActiveTab("all")}
           className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer relative ${
             activeTab === "all"
-              ? "bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-semibold"
-              : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+              ? "bg-primary/10 text-primary font-semibold"
+              : "text-muted-foreground hover:text-foreground hover:bg-sidebar-accent"
           }`}
         >
           <span>All ({directList.length + groupList.length})</span>
           {totalUnseen > 0 && (
             <span
-              className="inline-block w-1.5 h-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400 ml-1.5 mb-0.5 align-middle"
+              className="inline-block w-1.5 h-1.5 rounded-full bg-primary ml-1.5 mb-0.5 align-middle"
               aria-label={`${totalUnseen} unseen conversations`}
             />
           )}
@@ -245,14 +264,14 @@ export function Sidebar({
           onClick={() => setActiveTab("direct")}
           className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer relative ${
             activeTab === "direct"
-              ? "bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-semibold"
-              : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+              ? "bg-primary/10 text-primary font-semibold"
+              : "text-muted-foreground hover:text-foreground hover:bg-sidebar-accent"
           }`}
         >
           <span>Direct ({directList.length})</span>
           {totalUnseenDirect > 0 && (
             <span
-              className="inline-block w-1.5 h-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400 ml-1.5 mb-0.5 align-middle"
+              className="inline-block w-1.5 h-1.5 rounded-full bg-primary ml-1.5 mb-0.5 align-middle"
               aria-label={`${totalUnseenDirect} unseen direct conversations`}
             />
           )}
@@ -264,14 +283,14 @@ export function Sidebar({
           onClick={() => setActiveTab("groups")}
           className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer relative ${
             activeTab === "groups"
-              ? "bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-semibold"
-              : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+              ? "bg-primary/10 text-primary font-semibold"
+              : "text-muted-foreground hover:text-foreground hover:bg-sidebar-accent"
           }`}
         >
           <span>Groups ({groupList.length})</span>
           {totalUnseenGroups > 0 && (
             <span
-              className="inline-block w-1.5 h-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400 ml-1.5 mb-0.5 align-middle"
+              className="inline-block w-1.5 h-1.5 rounded-full bg-primary ml-1.5 mb-0.5 align-middle"
               aria-label={`${totalUnseenGroups} unseen groups`}
             />
           )}
@@ -281,8 +300,8 @@ export function Sidebar({
       {/* Conversation list */}
       <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-2 py-2 space-y-1">
         {isLoading ? (
-          <div className="p-8 text-center text-slate-400 flex flex-col items-center">
-            <Loader2Icon className="w-5 h-5 text-indigo-500 animate-spin mb-2" />
+          <div className="p-8 text-center text-muted-foreground flex flex-col items-center">
+            <Loader2Icon className="w-5 h-5 text-primary animate-spin mb-2" />
             <span className="text-xs">Loading conversations...</span>
           </div>
         ) : (
@@ -291,7 +310,7 @@ export function Sidebar({
             {(activeTab === "all" || activeTab === "direct") && (
               <>
                 {activeTab === "all" && filteredDirect.length > 0 && (
-                  <p className="px-3 pt-2 pb-1 text-[10px] font-semibold tracking-wider text-slate-400 uppercase">
+                  <p className="px-3 pt-2 pb-1 text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
                     Direct Messages
                   </p>
                 )}
@@ -325,10 +344,10 @@ export function Sidebar({
                       }
                       className={`w-full flex items-center gap-3 p-2.5 rounded-xl text-left transition-all cursor-pointer relative ${
                         isActive
-                          ? "bg-indigo-500/10 dark:bg-indigo-500/20 text-slate-900 dark:text-slate-100 ring-1 ring-indigo-500/30"
+                          ? "bg-primary/10 text-foreground ring-1 ring-primary/30"
                           : isUnseen
-                            ? "bg-indigo-50/70 dark:bg-indigo-950/40 hover:bg-indigo-100/70 dark:hover:bg-indigo-950/60 text-slate-900 dark:text-slate-100 ring-1 ring-indigo-500/25 shadow-xs"
-                            : "hover:bg-white dark:hover:bg-slate-800/60 text-slate-700 dark:text-slate-300"
+                            ? "bg-primary/5 hover:bg-primary/10 text-foreground ring-1 ring-primary/20 shadow-xs"
+                            : "hover:bg-sidebar-accent text-sidebar-foreground"
                       }`}
                     >
                       <div className="relative shrink-0">
@@ -340,7 +359,7 @@ export function Sidebar({
                         />
                         {isUnseen && (
                           <span
-                            className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-indigo-600 dark:bg-indigo-400 rounded-full ring-2 ring-white dark:ring-slate-900 shadow-xs"
+                            className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-primary rounded-full ring-2 ring-sidebar shadow-xs"
                             aria-hidden="true"
                           />
                         )}
@@ -350,8 +369,8 @@ export function Sidebar({
                           <span
                             className={`text-xs truncate ${
                               isUnseen
-                                ? "font-bold text-slate-950 dark:text-white"
-                                : "font-semibold text-slate-900 dark:text-slate-100"
+                                ? "font-bold text-foreground"
+                                : "font-semibold text-sidebar-foreground"
                             }`}
                           >
                             {conv.other_user.name}
@@ -360,8 +379,8 @@ export function Sidebar({
                             <span
                               className={`text-[10px] shrink-0 ${
                                 isUnseen
-                                  ? "text-indigo-600 dark:text-indigo-400 font-semibold"
-                                  : "text-slate-400"
+                                  ? "text-primary font-semibold"
+                                  : "text-muted-foreground"
                               }`}
                             >
                               {formatRelativeTime(
@@ -371,7 +390,7 @@ export function Sidebar({
                             </span>
                             {isUnseen && (
                               <span
-                                className="w-2 h-2 rounded-full bg-indigo-600 dark:bg-indigo-400 shrink-0"
+                                className="w-2 h-2 rounded-full bg-primary shrink-0"
                                 aria-hidden="true"
                               />
                             )}
@@ -381,8 +400,8 @@ export function Sidebar({
                           <p
                             className={`text-[11px] truncate ${
                               isUnseen
-                                ? "font-semibold text-slate-900 dark:text-slate-100"
-                                : "text-slate-500"
+                                ? "font-semibold text-foreground"
+                                : "text-muted-foreground"
                             }`}
                           >
                             {conv.last_message?.message || "No messages yet"}
@@ -402,7 +421,7 @@ export function Sidebar({
             {(activeTab === "all" || activeTab === "groups") && (
               <>
                 {activeTab === "all" && filteredGroups.length > 0 && (
-                  <p className="px-3 pt-3 pb-1 text-[10px] font-semibold tracking-wider text-slate-400 uppercase">
+                  <p className="px-3 pt-3 pb-1 text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
                     Group Channels
                   </p>
                 )}
@@ -433,17 +452,17 @@ export function Sidebar({
                       }
                       className={`w-full flex items-center gap-3 p-2.5 rounded-xl text-left transition-all cursor-pointer relative ${
                         isActive
-                          ? "bg-indigo-500/10 dark:bg-indigo-500/20 text-slate-900 dark:text-slate-100 ring-1 ring-indigo-500/30"
+                          ? "bg-primary/10 text-foreground ring-1 ring-primary/30"
                           : isUnseen
-                            ? "bg-indigo-50/70 dark:bg-indigo-950/40 hover:bg-indigo-100/70 dark:hover:bg-indigo-950/60 text-slate-900 dark:text-slate-100 ring-1 ring-indigo-500/25 shadow-xs"
-                            : "hover:bg-white dark:hover:bg-slate-800/60 text-slate-700 dark:text-slate-300"
+                            ? "bg-primary/5 hover:bg-primary/10 text-foreground ring-1 ring-primary/20 shadow-xs"
+                            : "hover:bg-sidebar-accent text-sidebar-foreground"
                       }`}
                     >
                       <div className="relative shrink-0">
                         <Avatar name={group.name} isGroup size="md" />
                         {isUnseen && (
                           <span
-                            className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-indigo-600 dark:bg-indigo-400 rounded-full ring-2 ring-white dark:ring-slate-900 shadow-xs"
+                            className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-primary rounded-full ring-2 ring-sidebar shadow-xs"
                             aria-hidden="true"
                           />
                         )}
@@ -453,8 +472,8 @@ export function Sidebar({
                           <span
                             className={`text-xs truncate ${
                               isUnseen
-                                ? "font-bold text-slate-950 dark:text-white"
-                                : "font-semibold text-slate-900 dark:text-slate-100"
+                                ? "font-bold text-foreground"
+                                : "font-semibold text-sidebar-foreground"
                             }`}
                           >
                             {group.name}
@@ -463,8 +482,8 @@ export function Sidebar({
                             <span
                               className={`text-[10px] shrink-0 ${
                                 isUnseen
-                                  ? "text-indigo-600 dark:text-indigo-400 font-semibold"
-                                  : "text-slate-400"
+                                  ? "text-primary font-semibold"
+                                  : "text-muted-foreground"
                               }`}
                             >
                               {formatRelativeTime(
@@ -473,7 +492,7 @@ export function Sidebar({
                             </span>
                             {isUnseen && (
                               <span
-                                className="w-2 h-2 rounded-full bg-indigo-600 dark:bg-indigo-400 shrink-0"
+                                className="w-2 h-2 rounded-full bg-primary shrink-0"
                                 aria-hidden="true"
                               />
                             )}
@@ -483,15 +502,13 @@ export function Sidebar({
                           <div
                             className={`flex items-center gap-1.5 text-[11px] ${
                               isUnseen
-                                ? "font-semibold text-slate-900 dark:text-slate-100"
-                                : "text-slate-500"
+                                ? "font-semibold text-foreground"
+                                : "text-muted-foreground"
                             }`}
                           >
                             <UsersIcon
                               className={`w-3 h-3 ${
-                                isUnseen
-                                  ? "text-indigo-600 dark:text-indigo-400"
-                                  : ""
+                                isUnseen ? "text-primary" : ""
                               }`}
                             />
                             <span>{group.member_count} members</span>
@@ -507,17 +524,32 @@ export function Sidebar({
               </>
             )}
 
-            {/* Empty state */}
+            {/* Empty state using shadcn Empty component */}
             {filteredDirect.length === 0 && filteredGroups.length === 0 && (
-              <div className="py-12 px-4 text-center text-slate-400">
-                <MessageSquareIcon className="w-8 h-8 mx-auto mb-2 opacity-30 text-indigo-500" />
-                <p className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                  No conversations yet
-                </p>
-                <p className="text-[11px] mt-1">
-                  Start a direct chat or create a group to begin messaging.
-                </p>
-              </div>
+              <Empty className="my-8 mx-2 border-none">
+                <EmptyIcon className="bg-primary/10 text-primary">
+                  <MessageSquareIcon className="w-6 h-6" />
+                </EmptyIcon>
+                <EmptyTitle>No conversations found</EmptyTitle>
+                <EmptyDescription>
+                  {filterQuery
+                    ? "No matches found for your search query. Try clearing the filter."
+                    : "Start a direct conversation or create a group channel to begin chatting."}
+                </EmptyDescription>
+                {!filterQuery && (
+                  <EmptyAction>
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={onOpenCreateChat}
+                      className="gap-1.5"
+                    >
+                      <PlusIcon className="w-3.5 h-3.5" />
+                      <span>Start Chatting</span>
+                    </Button>
+                  </EmptyAction>
+                )}
+              </Empty>
             )}
           </>
         )}

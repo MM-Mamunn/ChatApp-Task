@@ -286,7 +286,7 @@ export function ChatShell() {
   }, [user, directList]);
 
   return (
-    <div className="flex h-screen h-dvh max-h-dvh w-full overflow-hidden bg-slate-100 dark:bg-slate-950 font-sans fixed inset-0 md:relative md:inset-auto">
+    <div className="flex h-screen h-dvh max-h-dvh w-full overflow-hidden bg-background font-sans fixed inset-0 md:relative md:inset-auto">
       {/* Sidebar: Visible on desktop, or on mobile when no conversation is active */}
       <div
         className={`h-full min-h-0 md:shrink-0 ${

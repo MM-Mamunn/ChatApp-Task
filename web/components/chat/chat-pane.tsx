@@ -10,6 +10,9 @@ import {
 } from "@/lib/api-client";
 import { getSupabaseClient } from "@/lib/supabase-client";
 import { Avatar } from "../ui/avatar";
+import { Button } from "../ui/button";
+import { Alert, AlertDescription } from "../ui/alert";
+import { Empty, EmptyIcon, EmptyTitle, EmptyDescription } from "../ui/empty";
 import {
   SendIcon,
   ArrowLeftIcon,
@@ -17,6 +20,7 @@ import {
   UsersIcon,
   ChevronDownIcon,
   MessageSquareIcon,
+  XIcon,
 } from "../ui/icons";
 import type { ActiveTarget } from "./sidebar";
 import { GroupMembersModal } from "./group-members-modal";
@@ -579,40 +583,41 @@ export function ChatPane({
     [activeTarget, groupMembersMap, userProfiles, currentUser],
   );
 
+  // Empty state when no conversation is active
   if (!activeTarget) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-8 text-center bg-white dark:bg-slate-950 h-full min-h-0 w-full min-w-0 overflow-y-auto">
-        <div className="max-w-md w-full flex flex-col items-center justify-center px-4">
-          <div className="w-16 h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/60 flex items-center justify-center text-indigo-600 dark:text-indigo-400 mb-4 shadow-sm shrink-0">
+      <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-8 text-center bg-background h-full min-h-0 w-full min-w-0 overflow-y-auto">
+        <Empty className="max-w-md w-full border-none">
+          <EmptyIcon className="bg-primary/10 text-primary size-16 rounded-2xl">
             <MessageSquareIcon className="w-8 h-8" />
-          </div>
-          <h2 className="text-base font-semibold text-slate-800 dark:text-slate-200">
-            Select a Conversation
-          </h2>
-          <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto leading-relaxed break-words">
+          </EmptyIcon>
+          <EmptyTitle className="text-lg">Select a Conversation</EmptyTitle>
+          <EmptyDescription className="text-xs sm:text-sm">
             Choose a conversation from the sidebar or start a new chat to begin
             messaging with end-to-end authenticated security.
-          </p>
-        </div>
+          </EmptyDescription>
+        </Empty>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 flex flex-col h-full min-h-0 bg-white dark:bg-slate-950 min-w-0 overflow-hidden relative">
+    <div className="flex-1 flex flex-col h-full min-h-0 bg-background min-w-0 overflow-hidden relative">
       {/* Chat Pane Header */}
-      <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/80 backdrop-blur-sm flex items-center justify-between shrink-0 z-10">
+      <div className="px-4 py-3 border-b border-border bg-background/80 backdrop-blur-md flex items-center justify-between shrink-0 z-10">
         <div className="flex items-center gap-3 min-w-0">
           {/* Mobile Back Button */}
           {onBackToSidebar && (
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="icon"
               onClick={onBackToSidebar}
               aria-label="Back to conversations list"
-              className="md:hidden p-1.5 -ml-1 rounded-xl text-slate-500 hover:text-slate-800 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              className="md:hidden -ml-1 text-muted-foreground hover:text-foreground"
             >
               <ArrowLeftIcon className="w-5 h-5" />
-            </button>
+            </Button>
           )}
 
           {activeTarget.type === "direct" ? (
@@ -624,10 +629,10 @@ export function ChatPane({
                 size="md"
               />
               <div className="min-w-0">
-                <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">
+                <h2 className="text-sm font-semibold text-foreground truncate">
                   {activeTarget.recipientName}
                 </h2>
-                <p className="text-xs text-slate-400 truncate">
+                <p className="text-xs text-muted-foreground truncate">
                   {activeTarget.recipientEmail}
                 </p>
               </div>
@@ -636,7 +641,7 @@ export function ChatPane({
             <>
               <Avatar name={activeTarget.groupName} isGroup size="md" />
               <div className="min-w-0">
-                <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">
+                <h2 className="text-sm font-semibold text-foreground truncate">
                   {activeTarget.groupName}
                 </h2>
                 {(() => {
@@ -648,10 +653,10 @@ export function ChatPane({
                       aria-label={`View group members (${displayCount} ${
                         displayCount === 1 ? "member" : "members"
                       })`}
-                      className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer group rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                      className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors cursor-pointer group rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
-                      <UsersIcon className="w-3.5 h-3.5 text-indigo-500 group-hover:scale-110 transition-transform" />
-                      <span className="underline underline-offset-2 decoration-slate-300 dark:decoration-slate-700 group-hover:decoration-indigo-500 font-medium">
+                      <UsersIcon className="w-3.5 h-3.5 text-primary group-hover:scale-110 transition-transform" />
+                      <span className="underline underline-offset-2 decoration-border group-hover:decoration-primary font-medium">
                         {displayCount}{" "}
                         {displayCount === 1 ? "member" : "members"}
                       </span>
@@ -675,54 +680,57 @@ export function ChatPane({
         {/* Load earlier messages trigger */}
         {hasMore && (
           <div className="text-center py-2">
-            <button
+            <Button
               type="button"
+              variant="secondary"
+              size="sm"
               onClick={loadEarlierMessages}
               disabled={isLoadingEarlier}
-              className="px-3.5 py-1.5 text-xs font-medium rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors disabled:opacity-50 inline-flex items-center gap-1.5 cursor-pointer shadow-xs"
+              isLoading={isLoadingEarlier}
+              className="rounded-full shadow-xs"
             >
-              {isLoadingEarlier && <Loader2Icon className="w-3 h-3" />}
               <span>Load earlier messages</span>
-            </button>
+            </Button>
           </div>
         )}
 
         {/* Loading messages state */}
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-20 text-slate-400">
-            <Loader2Icon className="w-6 h-6 animate-spin text-indigo-500 mb-2" />
+          <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+            <Loader2Icon className="w-6 h-6 animate-spin text-primary mb-2" />
             <span className="text-xs">Loading conversation history...</span>
           </div>
         ) : loadError ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center text-slate-400">
-            <div className="w-12 h-12 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-500 flex items-center justify-center mb-3">
-              <MessageSquareIcon className="w-6 h-6 opacity-80" />
-            </div>
-            <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
-              Unable to load messages
-            </p>
-            <p className="text-xs text-rose-500 dark:text-rose-400 mt-1 max-w-sm px-4">
-              {loadError}
-            </p>
-            <button
-              type="button"
-              onClick={() => void loadMessages()}
-              className="mt-4 px-4 py-1.5 text-xs font-semibold rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white shadow-xs cursor-pointer transition-colors"
-            >
-              Retry
-            </button>
+          <div className="flex flex-col items-center justify-center py-20 text-center text-muted-foreground">
+            <Empty className="max-w-sm border-none">
+              <EmptyIcon className="bg-destructive/10 text-destructive size-12 rounded-xl">
+                <MessageSquareIcon className="w-6 h-6" />
+              </EmptyIcon>
+              <EmptyTitle>Unable to load messages</EmptyTitle>
+              <EmptyDescription className="text-destructive">
+                {loadError}
+              </EmptyDescription>
+              <Button
+                type="button"
+                size="sm"
+                onClick={() => void loadMessages()}
+                className="mt-2"
+              >
+                Retry
+              </Button>
+            </Empty>
           </div>
         ) : messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center text-slate-400">
-            <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-900 flex items-center justify-center text-slate-400 mb-3">
-              <MessageSquareIcon className="w-6 h-6 opacity-40" />
-            </div>
-            <p className="text-sm font-medium text-slate-600 dark:text-slate-300">
-              No messages yet
-            </p>
-            <p className="text-xs text-slate-400 mt-1">
-              Send the first message to start the conversation!
-            </p>
+          <div className="flex flex-col items-center justify-center py-20 text-center text-muted-foreground">
+            <Empty className="max-w-sm border-none">
+              <EmptyIcon className="bg-muted text-muted-foreground size-12 rounded-xl">
+                <MessageSquareIcon className="w-6 h-6 opacity-40" />
+              </EmptyIcon>
+              <EmptyTitle>No messages yet</EmptyTitle>
+              <EmptyDescription>
+                Send the first message to start the conversation!
+              </EmptyDescription>
+            </Empty>
           </div>
         ) : (
           messages.map((msg, index) => {
@@ -738,7 +746,7 @@ export function ChatPane({
               <React.Fragment key={msg.id}>
                 {showDateDivider && (
                   <div className="flex items-center justify-center my-4">
-                    <span className="px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-slate-100 dark:bg-slate-850 text-slate-500 dark:text-slate-400 border border-slate-200/60 dark:border-slate-800/60 shadow-xs">
+                    <span className="px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-muted text-muted-foreground border border-border shadow-xs">
                       {formatDateDivider(msg.created_at)}
                     </span>
                   </div>
@@ -766,7 +774,7 @@ export function ChatPane({
                     className={`max-w-[80%] sm:max-w-[70%] flex flex-col ${isSelf ? "items-end" : "items-start"}`}
                   >
                     {!isSelf && (
-                      <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 mb-1 px-1">
+                      <span className="text-[11px] font-medium text-muted-foreground mb-1 px-1">
                         {msg.sender_email}
                       </span>
                     )}
@@ -774,18 +782,14 @@ export function ChatPane({
                     <div
                       className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed break-words shadow-xs ${
                         isSelf
-                          ? "bg-indigo-600 text-white rounded-br-xs"
-                          : "bg-slate-100 dark:bg-slate-800/90 text-slate-900 dark:text-slate-100 border border-slate-200/60 dark:border-slate-700/60 rounded-bl-xs"
+                          ? "bg-primary text-primary-foreground rounded-br-xs"
+                          : "bg-muted text-foreground border border-border/60 rounded-bl-xs"
                       }`}
                     >
                       <p className="whitespace-pre-wrap">{msg.message}</p>
                     </div>
 
-                    <span
-                      className={`text-[10px] mt-1 px-1 ${
-                        isSelf ? "text-slate-400" : "text-slate-400"
-                      }`}
-                    >
+                    <span className="text-[10px] mt-1 px-1 text-muted-foreground">
                       {formatMessageTime(msg.created_at)}
                     </span>
                   </div>
@@ -801,33 +805,39 @@ export function ChatPane({
       {/* Floating Scroll to Bottom Button */}
       {isUserScrolledUp && (
         <div className="absolute bottom-24 right-6 z-20">
-          <button
+          <Button
             type="button"
+            size="sm"
             onClick={() => scrollToBottom(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-lg shadow-indigo-600/30 transition-all cursor-pointer"
+            className="rounded-full shadow-lg gap-1.5"
           >
             <ChevronDownIcon className="w-3.5 h-3.5" />
             <span>Latest messages</span>
-          </button>
+          </Button>
         </div>
       )}
 
       {/* Send Error Notice */}
       {sendError && (
-        <div className="mx-4 mb-2 p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-xs text-rose-700 dark:text-rose-300 flex items-center justify-between">
-          <span>{sendError}</span>
-          <button
-            type="button"
-            onClick={() => setSendError(null)}
-            className="text-rose-500 hover:text-rose-700 font-bold"
+        <div className="mx-4 mb-2">
+          <Alert
+            variant="destructive"
+            className="flex items-center justify-between py-2 px-3"
           >
-            ×
-          </button>
+            <AlertDescription className="text-xs">{sendError}</AlertDescription>
+            <button
+              type="button"
+              onClick={() => setSendError(null)}
+              className="text-destructive-foreground hover:opacity-80 font-bold ml-2 cursor-pointer"
+            >
+              <XIcon className="w-4 h-4" />
+            </button>
+          </Alert>
         </div>
       )}
 
       {/* Composer Input Area */}
-      <div className="p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:p-4 border-t border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-950/95 backdrop-blur-sm shrink-0 z-10">
+      <div className="p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:p-4 border-t border-border bg-background/95 backdrop-blur-md shrink-0 z-10">
         <form
           onSubmit={handleSendMessage}
           className="relative flex items-end gap-2"
@@ -841,27 +851,24 @@ export function ChatPane({
               aria-label="Write a message"
               rows={1}
               maxLength={4000}
-              className="w-full resize-none px-4 py-2.5 text-base sm:text-sm rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white dark:focus:bg-slate-950 transition-all max-h-28 sm:max-h-32 min-h-[44px]"
+              className="w-full resize-none px-4 py-2.5 text-base sm:text-sm rounded-2xl border border-input bg-muted/40 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:bg-background transition-all max-h-28 sm:max-h-32 min-h-[44px]"
             />
             {inputText.length > 3000 && (
-              <span className="absolute right-3 bottom-2 text-[10px] text-slate-400">
+              <span className="absolute right-3 bottom-2 text-[10px] text-muted-foreground">
                 {inputText.length}/4000
               </span>
             )}
           </div>
 
-          <button
+          <Button
             type="submit"
             disabled={!inputText.trim() || isSending}
-            className="w-11 h-11 shrink-0 rounded-2xl bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white flex items-center justify-center shadow-md shadow-indigo-600/25 transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+            isLoading={isSending}
+            className="size-11 shrink-0 rounded-2xl shadow-md"
             aria-label="Send message"
           >
-            {isSending ? (
-              <Loader2Icon className="w-4 h-4" />
-            ) : (
-              <SendIcon className="w-4 h-4 -mr-0.5" />
-            )}
-          </button>
+            {!isSending && <SendIcon className="w-4 h-4 -mr-0.5" />}
+          </Button>
         </form>
       </div>
 
